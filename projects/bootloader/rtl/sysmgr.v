@@ -36,10 +36,9 @@
 module sysmgr (
 	input  wire clk_in,
 	input  wire rst_in,
-	output wire clk_24m,
 	output wire clk_48m,
-	output wire clk_96m,
-	output wire rst_out
+	output wire rst_out,
+	output wire locked
 );
 
 	// Signals
@@ -48,65 +47,61 @@ module sysmgr (
 	wire pll_lock;
 	wire pll_reset;
 
-	wire clk_24m_i;
-	wire clk_48m_i;
-	wire clk_96m_i;
+	wire clk_48m_p;
+	wire clk_48m_s;
 	wire rst_i;
 	reg [7:0] rst_cnt;
 
 	// PLL instance
-	(* ICP_CURRENT="12" *)
-	(* LPF_RESISTOR="8" *)
-	(* MFG_ENABLE_FILTEROPAMP="1" *)
-	(* MFG_GMCREF_SEL="2" *)
-	EHXPLLL #(
-        .PLLRST_ENA("ENABLED"),
+(* FREQUENCY_PIN_CLKI="25" *)
+(* FREQUENCY_PIN_CLKOP="48" *)
+(* FREQUENCY_PIN_CLKOS="48" *)
+(* ICP_CURRENT="12" *) (* LPF_RESISTOR="8" *) (* MFG_ENABLE_FILTEROPAMP="1" *) (* MFG_GMCREF_SEL="2" *)
+EHXPLLL #(
+        .PLLRST_ENA("DISABLED"),
         .INTFB_WAKE("DISABLED"),
         .STDBY_ENABLE("DISABLED"),
         .DPHASE_SOURCE("DISABLED"),
-        .CLKOP_FPHASE(0),
-        .CLKOP_CPHASE(2),
         .OUTDIVIDER_MUXA("DIVA"),
+        .OUTDIVIDER_MUXB("DIVB"),
+        .OUTDIVIDER_MUXC("DIVC"),
+        .OUTDIVIDER_MUXD("DIVD"),
+        .CLKI_DIV(5),
         .CLKOP_ENABLE("ENABLED"),
-        .CLKOP_DIV(6),
+        .CLKOP_DIV(48),
+        .CLKOP_CPHASE(9),
+        .CLKOP_FPHASE(0),
         .CLKOS_ENABLE("ENABLED"),
-        .CLKOS_DIV(12),
-        .CLKOS_CPHASE(2),
+        .CLKOS_DIV(10),
+        .CLKOS_CPHASE(0),
         .CLKOS_FPHASE(0),
-        .CLKOS2_ENABLE("ENABLED"),
-        .CLKOS2_DIV(24),
-        .CLKOS2_CPHASE(2),
-        .CLKOS2_FPHASE(0),
-        .CLKFB_DIV(12),
-        .CLKI_DIV(1),
-        .FEEDBK_PATH("INT_OP")
-    ) pll_I (
-        .CLKI(clk_in),
-        .CLKFB(clk_fb),
-        .CLKINTFB(clk_fb),
-        .CLKOP(clk_96m_i),
-        .CLKOS(clk_48m_i),
-        .CLKOS2(clk_24m_i),
-        .RST(pll_reset),
+        .FEEDBK_PATH("CLKOP"),
+        .CLKFB_DIV(2)
+    ) pll_i (
+        .RST(1'b0),
         .STDBY(1'b0),
+        .CLKI(clk_in),
+        .CLKOP(clk_48m_p),
+        .CLKOS(clk_48m_s),
+        .CLKFB(clk_48m_p),
+        .CLKINTFB(),
         .PHASESEL0(1'b0),
         .PHASESEL1(1'b0),
-        .PHASEDIR(1'b0),
-        .PHASESTEP(1'b0),
+        .PHASEDIR(1'b1),
+        .PHASESTEP(1'b1),
+        .PHASELOADREG(1'b1),
         .PLLWAKESYNC(1'b0),
         .ENCLKOP(1'b0),
         .LOCK(pll_lock)
-	);
-
-	assign clk_24m = clk_24m_i;
-	assign clk_48m = clk_48m_i;
-	assign clk_96m = clk_96m_i;
+        );
+           
+	assign clk_48m = clk_48m_s;
 
 	// PLL reset generation
 	assign pll_reset = rst_in;
 
 	// Logic reset generation
-	always @(posedge clk_24m_i or negedge pll_lock)
+	always @(posedge clk_in)
 		if (!pll_lock)
 			rst_cnt <= 8'h0;
 		else if (~rst_cnt[7])
@@ -115,5 +110,7 @@ module sysmgr (
 	assign rst_i = ~rst_cnt[7];
 
 	assign rst_out = rst_i;
+
+	assign locked = pll_lock;
 
 endmodule // sysmgr

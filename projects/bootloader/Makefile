@@ -26,11 +26,11 @@ PROJ_TOP_MOD := top
 
 # Target config
 BOARD ?= had2019-badge
-DEVICE = 45k
+DEVICE = 12k
 PACKAGE = CABGA381
 SPEEDGRADE = 8
 
-NEXTPNR_ARGS = --pre-pack data/clocks.py
+#NEXTPNR_ARGS = --pre-pack data/clocks.py
 
 # Include default rules
 include ../../build/project-rules.mk
@@ -42,7 +42,7 @@ fw/fw_dfu.hex: fw
 $(BUILD_TMP)/boot.hex:
 	$(ECPBRAM) -g $@ -s 2019 -w 32 -d 8192
 
-$(BUILD_TMP)/$(PROJ).bit $(BUILD_TMP)/$(PROJ).svf: $(BUILD_TMP)/$(PROJ).config $(BUILD_TMP)/boot.hex fw/fw_dfu.hex
+$(BUILD_TMP)/$(PROJ).bit $(BUILD_TMP)/$(PROJ).svf: fw/fw_dfu.hex $(BUILD_TMP)/$(PROJ).config $(BUILD_TMP)/boot.hex fw/fw_dfu.hex
 	$(ECPBRAM) -v -f $(BUILD_TMP)/boot.hex -t fw/fw_dfu.hex -i $(BUILD_TMP)/$(PROJ).config -o $(BUILD_TMP)/$(PROJ)-sw.config
 	$(ECPPACK) \
 		--spimode $(FLASH_MODE) --freq $(FLASH_FREQ) \

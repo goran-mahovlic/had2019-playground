@@ -35,10 +35,10 @@
 
 module soc_had_misc (
 	// LEDs
-	output wire [8:0] led,
+	output wire [7:0] led,
 
 	// Buttons
-	input  wire [7:0] btn,
+	input  wire [6:0] btn,
 
 	// LCD
 	inout  wire [17:0] lcd_db,
@@ -90,14 +90,14 @@ module soc_had_misc (
 
 	// Buttons
 	reg  [16:0] btn_sample_cnt;
-	wire  [7:0] btn_io;
-	wire  [7:0] btn_r;
-	wire  [7:0] btn_val;
+	wire  [6:0] btn_io;
+	wire  [6:0] btn_r;
+	wire  [6:0] btn_val;
 
 	// LEDs (including LCD backlight)
-	reg   [9:0] led_ena;
+	reg   [7:0] led_ena;
 	reg  [29:0] led_pwm;
-	reg   [9:0] led_out;
+	reg   [7:0] led_out;
 
 	// Boot
 	reg   [7:0] boot_key;
@@ -142,7 +142,7 @@ module soc_had_misc (
 		if (rst) begin
 			boot_key  <=  8'h00;
 			lcd_rst_i <=  1'b0;
-			led_ena   <= 10'h000;
+			led_ena   <= 8'h00;
 			led_pwm   <= 30'h3fffffff;
 			fsel_c    <= 1'b0;
 			fsel_d    <= 1'b0;
@@ -152,7 +152,7 @@ module soc_had_misc (
 				lcd_rst_i <= bus_wdata[15];
 				fsel_c    <= bus_wdata[14];
 				fsel_d    <= bus_wdata[13];
-				led_ena   <= bus_wdata[9:0];
+				led_ena   <= bus_wdata[7:0];
 			end
 
 			if (we_led_pwm) begin
@@ -178,14 +178,14 @@ module soc_had_misc (
 	// IO register
 	TRELLIS_IO #(
 		.DIR("INPUT")
-	) btn_io_I[7:0] (
+	) btn_io_I[6:0] (
 		.B(btn),
 		.I(1'b0),
 		.T(1'b0),
 		.O(btn_io)
 	);
 
-	IFS1P3BX btn_ireg[7:0] (
+	IFS1P3BX btn_ireg[6:0] (
 		.PD(1'b0),
 		.D(btn_io),
 		.SP(1'b1),
@@ -203,7 +203,7 @@ module soc_had_misc (
 	glitch_filter #(
 		.L(3),
 		.WITH_CE(1)
-	) btn_flt_I[7:0] (
+	) btn_flt_I[6:0] (
 		.pin_iob_reg(btn_r),
 		.cond(1'b1),
 		.ce(btn_sample_cnt[16]),
@@ -239,13 +239,13 @@ module soc_had_misc (
 		if (pwm_cnt >= 6'h3f) pwm_map <= 3'd7;
 	end
 
-	for (i=0; i<10; i++)
+	for (i=0; i<8; i++)
 		always @(posedge clk)
 			led_out[i] <= led_ena[i] & (led_pwm[3*i+:3] >= pwm_map);
 
 	// Led output
-	assign led = led_out[8:0];
-	assign lcd_blen = led_out[9];
+	assign led = led_out[7:0];
+	//assign lcd_blen = led_out[9];
 
 
 	// Reboot key
@@ -261,6 +261,7 @@ module soc_had_misc (
 	assign lcd_wr_i = ~(ack_nxt & bus_addr[1]);
 
 	// PHY (just put IO registers on all signals since we don't support reads)
+	/*
 	OFS1P3DX lcd_or_data_I[17:0] (
 		.CD(rst),
 		.D(bus_wdata[17:0]),
@@ -299,5 +300,6 @@ module soc_had_misc (
 	assign lcd_cs = 1'b0;
 	assign lcd_rd  = 1'b1;
 	assign lcd_rst = lcd_rst_i;
+	*/
 
 endmodule // soc_had_misc
