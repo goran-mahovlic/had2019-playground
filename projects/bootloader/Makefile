@@ -51,6 +51,15 @@ $(BUILD_TMP)/$(PROJ).bit $(BUILD_TMP)/$(PROJ).svf: fw/fw_dfu.hex $(BUILD_TMP)/$(
 		--svf $(BUILD_TMP)/$(PROJ).svf --svf-rowsize 100000 \
 		--bit $(BUILD_TMP)/$(PROJ).bit
 
+$(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit
+	ecpmulti             --input $(BUILD_TMP)/$(PROJ).bit \
+	  --address 0x180000 --input $(BUILD_TMP)/$(PROJ).bit \
+	  --flashsize 128 \
+	  --output $@
+
+flash: $(BUILD_TMP)/multiboot.img
+	fujprog -j flash $<
+
 dfu_flash: $(BUILD_TMP)/$(PROJ).bit
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 5 -R -D $<
 
