@@ -111,18 +111,6 @@ module top (
 	wire wb_we;
 	wire [WB_N-1:0] wb_ack;
 
-	// GPIO
-	wire  [6:0] btn_io;
-	wire  [6:0] btn_r;
-	wire  [6:0] btn_val;
-
-	reg   [7:0] led_out;
-	reg   [7:0] boot_key;
-
-	reg         gpio_ack;
-	wire        gpio_rdata_rst;
-	reg  [31:0] gpio_rdata;
-
 	// USB EP Buffer
 	wire [ 8:0] ep_tx_addr_0;
 	wire [31:0] ep_tx_data_0;
