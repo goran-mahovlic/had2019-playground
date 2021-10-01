@@ -57,11 +57,17 @@ $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit
 	  --flashsize 128 \
 	  --output $@
 
+# flash whole multiboot image
 flash: $(BUILD_TMP)/multiboot.img
 	fujprog -j flash $<
 
-dfu_flash: $(BUILD_TMP)/$(PROJ).bit
+# DFU write bootloader bitstream
+dfu_bootloader: $(BUILD_TMP)/$(PROJ).bit
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 5 -R -D $<
+
+# DFU write user bitstream
+dfu_user: $(BUILD_TMP)/blink.bit
+	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -D $<
 
 # Always try to rebuild the hex file
 .PHONY: fw
