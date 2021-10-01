@@ -154,12 +154,12 @@ static const struct {
 	uint32_t start;
 	uint32_t end;
 } dfu_zones[6] = {
-	{ FLASHCHIP_INTERNAL, 0x00180000, 0x00300000 },	/* ECP5 bitstream */
-	{ FLASHCHIP_INTERNAL, 0x00300000, 0x00380000 },	/* RISC-V firmware */
+	{ FLASHCHIP_INTERNAL, 0x00200000, 0x00400000 },	/* ECP5 bitstream */
+	{ FLASHCHIP_INTERNAL, 0x00400000, 0x00480000 },	/* RISC-V firmware */
 	{ FLASHCHIP_CART,     0x00000000, 0x00180000 },	/* Cart ECP5 bitstream */
 	{ FLASHCHIP_CART,     0x00180000, 0x00200000 },	/* Cart IPL region */
 	{ FLASHCHIP_CART,     0x00200000, 0x01000000 },	/* Cart filesystem region */
-	{ FLASHCHIP_INTERNAL, 0x00000000, 0x00180000 },	/* Boot Loader */
+	{ FLASHCHIP_INTERNAL, 0x00000000, 0x00200000 },	/* Boot Loader */
 };
 
 
