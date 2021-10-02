@@ -1,6 +1,11 @@
 # Project config
 PROJ = bootloader
 
+# address in FLASH where user bitstream starts
+# should match FLASHCHIP_INTERNAL dfu_zones[] in fw/usb_dfu.c
+# and be larger than bootloader bitstream
+USER_BITSTREAM_ADDR := 0x200000
+
 PROJ_DEPS := usb misc
 
 PROJ_RTL_SRCS := $(addprefix rtl/, \
@@ -15,20 +20,21 @@ PROJ_RTL_SRCS := $(addprefix rtl/, \
 PROJ_SIM_SRCS := $(addprefix sim/, \
 	spiflash.v \
 )
-PROJ_SIM_SRCS += rtl/top.v
+PROJ_SIM_SRCS += rtl/top-ulx3s.v
 PROJ_TESTBENCHES := \
 	dfu_helper_tb \
 	top_tb
 PROJ_PREREQ = \
 	$(BUILD_TMP)/boot.hex
-PROJ_TOP_SRC := rtl/top.v
+PROJ_TOP_SRC := rtl/top-ulx3s.v
 PROJ_TOP_MOD := top
 
 # Target config
-BOARD ?= had2019-badge
-DEVICE = 12k
+#BOARD ?= ulx3s-v20
+BOARD ?= ulx3s-v317
+DEVICE = 85k
 PACKAGE = CABGA381
-SPEEDGRADE = 8
+SPEEDGRADE = 6
 
 #NEXTPNR_ARGS = --pre-pack data/clocks.py
 
@@ -37,7 +43,9 @@ include ../../build/project-rules.mk
 
 # Custom rules
 fw/fw_dfu.hex: fw
-	make -C fw fw_dfu.hex
+	#cp fw/fw_dfu.hex-0x180000 fw/fw_dfu.hex
+	cp fw/fw_dfu.hex-0x200000 fw/fw_dfu.hex
+	#echo make -C fw fw_dfu.hex
 
 $(BUILD_TMP)/boot.hex:
 	$(ECPBRAM) -g $@ -s 2019 -w 32 -d 8192
@@ -46,18 +54,23 @@ $(BUILD_TMP)/$(PROJ).bit $(BUILD_TMP)/$(PROJ).svf: fw/fw_dfu.hex $(BUILD_TMP)/$(
 	$(ECPBRAM) -v -f $(BUILD_TMP)/boot.hex -t fw/fw_dfu.hex -i $(BUILD_TMP)/$(PROJ).config -o $(BUILD_TMP)/$(PROJ)-sw.config
 	$(ECPPACK) \
 		--spimode $(FLASH_MODE) --freq $(FLASH_FREQ) \
-		--bootaddr 0x180000 --compress \
+		--bootaddr $(USER_BITSTREAM_ADDR) \
+		--compress \
 		--input $(BUILD_TMP)/$(PROJ)-sw.config \
 		--svf $(BUILD_TMP)/$(PROJ).svf --svf-rowsize 100000 \
 		--bit $(BUILD_TMP)/$(PROJ).bit
 
+
 $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit
-	ecpmulti             --input $(BUILD_TMP)/$(PROJ).bit \
-	  --address 0x180000 --input $(BUILD_TMP)/$(PROJ).bit \
+	ecpmulti                           --input $(BUILD_TMP)/$(PROJ).bit \
+	  --address $(USER_BITSTREAM_ADDR) --input $(BUILD_TMP)/$(PROJ).bit \
 	  --flashsize 128 \
 	  --output $@
 
-# flash whole multiboot image
+# make multiboot image
+multi: $(BUILD_TMP)/multiboot.img
+
+# flash multiboot image
 flash: $(BUILD_TMP)/multiboot.img
 	fujprog -j flash $<
 
