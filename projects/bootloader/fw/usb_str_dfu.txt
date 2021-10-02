@@ -1,10 +1,11 @@
 0000000000000000
-HACKADAY
-Supercon 2019 badge (DFU)
+FER-RADIONA-EMARD
+ULX3S FPGA (DFU)
 DFU
-ECP5 bitstream (SoC)
-RISC-V firmware (IPL)
-Cartridge ECP5 bitstream (SoC)
-Cartridge RISC-V firmware (IPL)
-Cartridge main FS region
-Bootloader
+0x200000 User Bitstream
+0x340000 Saxonsoc fw_jump
+0x380000 Saxonsoc u-boot
+0x400000 User Data
+0x800000 User Data
+0x000000 Bootloader Bitstream
+0x000000 RTC
