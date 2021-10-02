@@ -240,7 +240,7 @@ _dfu_tick(void)
 			/* Write page */
 			DBG_PRINTF("Page program start @ %08x - t=%d\n", g_dfu.flash.addr_prog + g_dfu.flash.op_ofs, usb_get_tick());
 			flash_write_enable();
-			flash_quad_page_program(&g_dfu.buf.data[g_dfu.buf.rd][g_dfu.flash.op_ofs], g_dfu.flash.addr_prog + g_dfu.flash.op_ofs, l);
+			flash_page_program(&g_dfu.buf.data[g_dfu.buf.rd][g_dfu.flash.op_ofs], g_dfu.flash.addr_prog + g_dfu.flash.op_ofs, l);
 
 			/* Next page */
 			g_dfu.flash.op_ofs += l;
