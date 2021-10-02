@@ -86,7 +86,8 @@ $(BUILD_TMP)/$(PROJ).pnr.rpt $(BUILD_TMP)/$(PROJ).config: $(BUILD_TMP)/$(PROJ).j
 		-l $(BUILD_TMP)/$(PROJ).pnr.rpt \
 		--json $(BUILD_TMP)/$(PROJ).json \
 		--lpf $(PIN_DEF) \
-		--textcfg $@ 
+		--textcfg $@ \
+		--timing-allow-fail \
 
 %.bit %.svf: %.config
 	$(ECPPACK) --spimode $(FLASH_MODE) --freq $(FLASH_FREQ) --svf-rowsize 100000 --svf $*.svf --input $< --bit $*.bit
