@@ -43,9 +43,20 @@ module top (
 	// Buttons
 	input  wire [6:0] btn,
 
-	// Debug UART
+	// Debug or esp32 passthru UART
 	input  wire ftdi_txd,
 	output wire ftdi_rxd,
+        input  wire ftdi_ndtr,
+        input  wire ftdi_nrts,
+
+	// ESP32 passthru
+	input  wire wifi_txd,
+	output wire wifi_rxd,
+        input  wire wifi_gpio15, wifi_gpio14,
+        inout  wire wifi_gpio13, wifi_gpio12,
+        inout  wire wifi_gpio4 , wifi_gpio2 , wifi_gpio0 ,
+        output wire wifi_en,
+        output wire sd_wp, // BGA pin exists but not connected on PCB
 
 	// SPI Flash
 	inout  wire flash_mosi,
@@ -126,7 +137,34 @@ module top (
 	// Diagnostics
 	wire locked;
 	//assign diag = {rst, clk_48m};
-
+	
+	// ESP32 passthru
+	esp32_passthru
+	#(
+		.C_powerup_en_time(0)
+	)
+	esp32_passthru_I
+	(
+		.clk_25mhz(clk_25mhz),
+		.btn(7'h01),
+		//.led(led),
+		.ftdi_txd(ftdi_txd),
+		.ftdi_rxd(ftdi_rxd),
+		.ftdi_ndtr(ftdi_ndtr),
+		.ftdi_nrts(ftdi_nrts),
+		.wifi_txd(wifi_txd),
+		.wifi_rxd(wifi_rxd),
+		.wifi_gpio15(wifi_gpio15),
+		.wifi_gpio14(wifi_gpio14),
+		.wifi_gpio13(wifi_gpio13),
+		.wifi_gpio12(wifi_gpio12),
+		.wifi_gpio4(wifi_gpio4),
+		.wifi_gpio2(wifi_gpio2),
+		.wifi_gpio0(wifi_gpio0),
+		.wifi_en(wifi_en),
+		//  wifi_gpio5 // v3.0.x, not available on v3.1.x
+		.sd_wp(sd_wp) // BGA pin exists but not connected on PCB
+	);
 
 	// SoC
 	// ---
@@ -225,8 +263,8 @@ module top (
 		.DIV_WIDTH(16),
 		.DW(WB_DW)
 	) uart_I (
-		.uart_tx(ftdi_rxd),
-		.uart_rx(ftdi_txd),
+		//.uart_tx(ftdi_rxd),
+		//.uart_rx(ftdi_txd),
 		.bus_addr(wb_addr[1:0]),
 		.bus_wdata(wb_wdata),
 		.bus_rdata(wb_rdata[1]),

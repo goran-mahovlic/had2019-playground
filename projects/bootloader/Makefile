@@ -16,6 +16,7 @@ PROJ_RTL_SRCS := $(addprefix rtl/, \
 	soc_bridge.v \
 	soc_had_misc.v \
 	sysmgr.v \
+	esp32_passthru.v \
 )
 PROJ_SIM_SRCS := $(addprefix sim/, \
 	spiflash.v \
@@ -32,7 +33,7 @@ PROJ_TOP_MOD := top
 # Target config
 #BOARD ?= ulx3s-v20
 BOARD ?= ulx3s-v317
-DEVICE = 85k
+DEVICE = 12k
 PACKAGE = CABGA381
 SPEEDGRADE = 6
 
