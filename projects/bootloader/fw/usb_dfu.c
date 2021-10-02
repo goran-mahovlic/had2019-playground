@@ -153,7 +153,7 @@ static const struct {
 	uint32_t flashsel;
 	uint32_t start;
 	uint32_t end;
-} dfu_zones[6] = {
+} dfu_zones[7] = {
 	{ FLASHCHIP_INTERNAL, 0x00200000, 0x01000000 },	/* 0 user bitstream and data */
 	{ FLASHCHIP_INTERNAL, 0x00340000, 0x00380000 },	/* 1 saxonsoc fw_jump  */
 	{ FLASHCHIP_INTERNAL, 0x00380000, 0x01000000 },	/* 2 saxonsoc u-boot */
