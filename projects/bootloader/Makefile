@@ -77,17 +77,23 @@ $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit
 # make multiboot image
 multi: $(BUILD_TMP)/multiboot.img
 
-# flash multiboot image
+# flash multiboot image with fujprog
 flash: $(BUILD_TMP)/multiboot.img
 	fujprog -j flash $<
 
-# DFU write bootloader bitstream
+# flash multiboot image with openFPGALoader
+flash_ofl: $(BUILD_TMP)/multiboot.img
+	openFPGALoader -b ulx3s --file-type bin -f $<
+
+# DFU write (upgrade) bootloader bitstream and start it
+# hold BTN1 and BTN2 and plug USB
 dfu_bootloader: $(BUILD_TMP)/$(PROJ).bit
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 5 -R -D $<
 
-# DFU write user bitstream
+# DFU write user bitstream and start it
+# hold BTN1 and plug USB
 dfu_user: $(BUILD_TMP)/blink.bit
-	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -D $<
+	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -R -D $<
 
 # Always try to rebuild the hex file
 .PHONY: fw
