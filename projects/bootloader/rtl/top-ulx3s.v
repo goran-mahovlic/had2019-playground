@@ -137,8 +137,11 @@ module top (
 	// Diagnostics
 	wire locked;
 	//assign diag = {rst, clk_48m};
-	
-	// ESP32 passthru
+
+	// this is not needed for bootloader but it's
+	// good for user convenience to access and
+	// flash ESP32 over US1.
+	// TODO 3-state ftdi usbserial MUX for debug and ESP32
 	esp32_passthru
 	#(
 		.C_powerup_en_time(0)
