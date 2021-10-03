@@ -25,6 +25,7 @@ PROJ_RTL_SRCS := $(addprefix rtl/, \
 	soc_had_misc.v \
 	sysmgr.v \
 	esp32_passthru.v \
+	i2c_bridge.v \
 )
 PROJ_SIM_SRCS := $(addprefix sim/, \
 	spiflash.v \
@@ -71,8 +72,8 @@ $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit
 	  --output $@
 
 # to apply non-serdes bootloader bitstream to serdes 85F chip
-# --input-idcode  0x81113043
-# --output-idcode 0x81113043
+# --input-idcode  0x81113043 \
+# --output-idcode 0x81113043 \
 
 # make multiboot image
 multi: $(BUILD_TMP)/multiboot.img
