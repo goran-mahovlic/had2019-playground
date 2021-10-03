@@ -5,7 +5,7 @@ PROJ = bootloader
 BOARD ?= ulx3s-v20
 #BOARD ?= ulx3s-v314
 #BOARD ?= ulx3s-v317
-DEVICE = 85k
+DEVICE = 12k
 PACKAGE = CABGA381
 SPEEDGRADE = 6
 
