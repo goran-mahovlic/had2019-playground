@@ -1,6 +1,14 @@
 # Project config
 PROJ = bootloader
 
+# Target config
+BOARD ?= ulx3s-v20
+#BOARD ?= ulx3s-v314
+#BOARD ?= ulx3s-v317
+DEVICE = 85k
+PACKAGE = CABGA381
+SPEEDGRADE = 6
+
 # address in FLASH where user bitstream starts
 # should match FLASHCHIP_INTERNAL dfu_zones[] in fw/usb_dfu.c
 # and be larger than bootloader bitstream
@@ -30,12 +38,6 @@ PROJ_PREREQ = \
 PROJ_TOP_SRC := rtl/top-ulx3s.v
 PROJ_TOP_MOD := top
 
-# Target config
-#BOARD ?= ulx3s-v20
-BOARD ?= ulx3s-v317
-DEVICE = 12k
-PACKAGE = CABGA381
-SPEEDGRADE = 6
 
 #NEXTPNR_ARGS = --pre-pack data/clocks.py
 
@@ -63,10 +65,10 @@ $(BUILD_TMP)/$(PROJ).bit $(BUILD_TMP)/$(PROJ).svf: fw/fw_dfu.hex $(BUILD_TMP)/$(
 
 
 $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit
-	ecpmulti                           --input $(BUILD_TMP)/$(PROJ).bit \
+	ecpmulti  --input-idcode 0x81113043     --input $(BUILD_TMP)/$(PROJ).bit \
 	  --address $(USER_BITSTREAM_ADDR) --input $(BUILD_TMP)/$(PROJ).bit \
 	  --flashsize 128 \
-	  --output $@
+	  --output-idcode 0x81113043 --output $@
 
 # make multiboot image
 multi: $(BUILD_TMP)/multiboot.img
