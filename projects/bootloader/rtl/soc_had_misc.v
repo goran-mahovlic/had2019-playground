@@ -170,7 +170,7 @@ module soc_had_misc (
 			bus_rdata <= bus_addr[0] ?
 				{ 2'b00, led_pwm } :
 				//{ boot_key, btn_val, lcd_rst_i, fsel_c, fsel_d, 3'd0, led_ena };
-				{ boot_key, btn_val[2], ~btn_val[1], btn_val[6:3], 2'b00, lcd_rst_i, fsel_c, fsel_d, 5'd0, led_ena }; // ULX3S hold BTN1 and plug US2
+				{ boot_key, ~btn_val[2], ~btn_val[1], ~btn_val[6:3], 2'b00, lcd_rst_i, fsel_c, fsel_d, 5'd0, led_ena }; // ULX3S hold BTN1 and plug US2
 
 
 
