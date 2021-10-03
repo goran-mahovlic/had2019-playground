@@ -38,7 +38,11 @@ module soc_had_misc (
 	output wire [7:0] led,
 
 	// Buttons
-	input  wire [6:0] btn,
+	input  wire [7:0] btn,
+
+	// external BTN remapper
+	output wire [7:0] btn_remap_o,
+	input  wire [7:0] btn_remap_i,
 
 	// LCD
 	inout  wire [17:0] lcd_db,
@@ -90,9 +94,9 @@ module soc_had_misc (
 
 	// Buttons
 	reg  [16:0] btn_sample_cnt;
-	wire  [6:0] btn_io;
-	wire  [6:0] btn_r;
-	wire  [6:0] btn_val;
+	wire  [7:0] btn_io;
+	wire  [7:0] btn_r;
+	wire  [7:0] btn_val;
 
 	// LEDs (including LCD backlight)
 	reg   [7:0] led_ena;
@@ -170,7 +174,7 @@ module soc_had_misc (
 			bus_rdata <= bus_addr[0] ?
 				{ 2'b00, led_pwm } :
 				//{ boot_key, btn_val, lcd_rst_i, fsel_c, fsel_d, 3'd0, led_ena };
-				{ boot_key, ~btn_val[2], ~btn_val[1], ~btn_val[6:3], 2'b00, lcd_rst_i, fsel_c, fsel_d, 5'd0, led_ena }; // ULX3S hold BTN1 and plug US2
+				{ boot_key, btn_val, lcd_rst_i, fsel_c, fsel_d, 5'd0, led_ena };
 
 
 
@@ -180,14 +184,14 @@ module soc_had_misc (
 	// IO register
 	TRELLIS_IO #(
 		.DIR("INPUT")
-	) btn_io_I[6:0] (
+	) btn_io_I[7:0] (
 		.B(btn),
 		.I(1'b0),
 		.T(1'b0),
 		.O(btn_io)
 	);
 
-	IFS1P3BX btn_ireg[6:0] (
+	IFS1P3BX btn_ireg[7:0] (
 		.PD(1'b0),
 		.D(btn_io),
 		.SP(1'b1),
@@ -205,17 +209,17 @@ module soc_had_misc (
 	glitch_filter #(
 		.L(3),
 		.WITH_CE(1)
-	) btn_flt_I[6:0] (
+	) btn_flt_I[7:0] (
 		.pin_iob_reg(btn_r),
 		.cond(1'b1),
 		.ce(btn_sample_cnt[16]),
-		.val(btn_val),
+		.val(btn_remap_o),
 		.rise(),
 		.fall(),
 		.clk(clk),
 		.rst(rst),
 	);
-
+	assign btn_val = btn_remap_i; // external BTN remapper
 
 	// LEDs
 	// ----

@@ -33,7 +33,11 @@
 
 `default_nettype none
 
-module top (
+module top 
+#(
+	parameter serial_debug = 0 // 0:ESP32 passthru, 1:RISC-V CPU debug console
+)
+(
 	// Clock
 	input  wire clk_25mhz,
 
@@ -42,7 +46,10 @@ module top (
 
 	// Buttons
 	input  wire [6:0] btn,
-
+	
+	// DIP switches
+	input  wire [3:0] sw,
+	
 	// Debug or esp32 passthru UART
 	input  wire ftdi_txd,
 	output wire ftdi_rxd,
@@ -138,6 +145,11 @@ module top (
 	wire locked;
 	//assign diag = {rst, clk_48m};
 
+	wire pass_uart_rxd = serial_debug ? 1 : ftdi_txd;
+	wire boot_uart_rxd = serial_debug ? ftdi_txd : 1;
+	wire pass_uart_txd, boot_uart_txd;
+	assign ftdi_rxd = serial_debug ? boot_uart_txd : pass_uart_txd;
+	
 	// this is not needed for bootloader but it's
 	// good for user convenience to access and
 	// flash ESP32 over US1.
@@ -151,8 +163,8 @@ module top (
 		.clk_25mhz(clk_25mhz),
 		.btn(7'h01),
 		//.led(led),
-		.ftdi_txd(ftdi_txd),
-		.ftdi_rxd(ftdi_rxd),
+		.ftdi_txd(pass_uart_rxd),
+		.ftdi_rxd(pass_uart_txd),
 		.ftdi_ndtr(ftdi_ndtr),
 		.ftdi_nrts(ftdi_nrts),
 		.wifi_txd(wifi_txd),
@@ -244,10 +256,22 @@ module top (
 		.clk(clk_48m)
 	);
 
+	// BTN remapper (after debouncer in soc_had_misc)
+	wire [7:0] btn_remap_o;
+	wire [7:0] btn_remap_i = ~ // invert all, RISC-V FW inverts it back
+	{
+	  btn_remap_o[2]   , // BTN2 hold and plug USB to write protect flash
+	  btn_remap_o[1]   , // BTN1 hold and plug USB to stay in bootloader
+	  btn_remap_o[6:3] , // reserved
+	  1'b0             , // disabled btn_remap_o[7] aka DIP sw[3]
+	 ~btn_remap_o[0]     // BTN0 reserved, (BTN0 has inverted logic on ULX3S)
+	};
 	// Peripheral [0] : Misc
 	soc_had_misc had_misc_I (
 		.led(led),
-		.btn(btn),
+		.btn({sw[3],btn}),
+		.btn_remap_o(btn_remap_o),
+		.btn_remap_i(btn_remap_i),
 		.programn(user_programn),
 		.bus_addr(wb_addr[3:0]),
 		.bus_wdata(wb_wdata),
@@ -266,8 +290,8 @@ module top (
 		.DIV_WIDTH(16),
 		.DW(WB_DW)
 	) uart_I (
-		//.uart_tx(ftdi_rxd),
-		//.uart_rx(ftdi_txd),
+		.uart_tx(boot_uart_txd),
+		.uart_rx(boot_uart_rxd),
 		.bus_addr(wb_addr[1:0]),
 		.bus_wdata(wb_wdata),
 		.bus_rdata(wb_rdata[1]),
