@@ -48,15 +48,17 @@ otherwise it should be run as root:
     ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="614b", \
     GROUP="dialout", MODE="666"
 
-To upload and start user bitstream (fast, few seconds):
+DFU is very fast, writes bitstream in few seconds.
+
+To upload and start user bitstream, hold BTN1 and plug USB:
 
     dfu-util -a 0 -R -D blink.bit
     or
     openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 0 blink.bit
 
-To upgrade bootloader (fast, few seconds)
+To upgrade bootloader, hold BTN1 and BTN2 and plug USB:
 
-    dfu-util -a 5 -D bootloader.bit
+    dfu-util -a 5 -R -D bootloader.bit
     or
     openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 5 bootloader.bit
 
