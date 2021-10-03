@@ -134,6 +134,9 @@ module top
 	wire flash_sck;
 	wire flash_cs;
 
+	// BTN remapper
+	wire [7:0] btn_remap_o, btn_remap_i;
+
 	// Clocks / Reset
 	wire clk_48m;
 	wire rst;
@@ -161,7 +164,7 @@ module top
 	esp32_passthru_I
 	(
 		.clk_25mhz(clk_25mhz),
-		.btn(7'h01),
+		.btn(btn_remap_o),
 		//.led(led),
 		.ftdi_txd(pass_uart_rxd),
 		.ftdi_rxd(pass_uart_txd),
@@ -257,8 +260,7 @@ module top
 	);
 
 	// BTN remapper (after debouncer in soc_had_misc)
-	wire [7:0] btn_remap_o;
-	wire [7:0] btn_remap_i = ~ // invert all, RISC-V FW inverts it back
+	assign btn_remap_i = ~ // invert all, RISC-V FW inverts it back
 	{
 	  btn_remap_o[2]   , // BTN2 hold and plug USB to write protect flash and upgrade bootloader
 	  btn_remap_o[1]   , // BTN1 hold and plug USB to stay in bootloader
