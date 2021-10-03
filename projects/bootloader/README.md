@@ -58,7 +58,7 @@ To upgrade bootloader (fast, few seconds)
 
     dfu-util -a 5 -D bootloader.bit
     or
-    openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 0 bootloader.bit
+    openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 5 bootloader.bit
 
 To list all flashing destinations for -a N
 
