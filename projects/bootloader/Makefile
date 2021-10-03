@@ -65,10 +65,14 @@ $(BUILD_TMP)/$(PROJ).bit $(BUILD_TMP)/$(PROJ).svf: fw/fw_dfu.hex $(BUILD_TMP)/$(
 
 
 $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit
-	ecpmulti  --input-idcode 0x81113043     --input $(BUILD_TMP)/$(PROJ).bit \
+	ecpmulti                           --input $(BUILD_TMP)/$(PROJ).bit \
 	  --address $(USER_BITSTREAM_ADDR) --input $(BUILD_TMP)/$(PROJ).bit \
 	  --flashsize 128 \
-	  --output-idcode 0x81113043 --output $@
+	  --output $@
+
+# to apply non-serdes bootloader bitstream to serdes 85F chip
+# --input-idcode  0x81113043
+# --output-idcode 0x81113043
 
 # make multiboot image
 multi: $(BUILD_TMP)/multiboot.img
