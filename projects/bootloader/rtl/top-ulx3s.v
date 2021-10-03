@@ -260,7 +260,7 @@ module top
 	wire [7:0] btn_remap_o;
 	wire [7:0] btn_remap_i = ~ // invert all, RISC-V FW inverts it back
 	{
-	  btn_remap_o[2]   , // BTN2 hold and plug USB to write protect flash
+	  btn_remap_o[2]   , // BTN2 hold and plug USB to write protect flash and upgrade bootloader
 	  btn_remap_o[1]   , // BTN1 hold and plug USB to stay in bootloader
 	  btn_remap_o[6:3] , // reserved
 	  1'b0             , // disabled btn_remap_o[7] aka DIP sw[3]
