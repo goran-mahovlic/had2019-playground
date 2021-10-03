@@ -9,9 +9,7 @@ To install new bootloader for the first time (5 minutes flashing)
 choose bitstream for your board and:
 
     fujprog -j flash multiboot.img
-
-or
-
+    or
     openFPGALoader -b ulx3s --file-type bin -f multiboot.img
 
 To enter bootloader, hold BTN1 and plug US2
@@ -53,17 +51,13 @@ otherwise it should be run as root:
 To upload and start user bitstream (fast, few seconds):
 
     dfu-util -a 0 -R -D blink.bit
-
-or
-
+    or
     openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 0 blink.bit
 
 To upgrade bootloader (fast, few seconds)
 
     dfu-util -a 5 -D bootloader.bit
-
-or
-
+    or
     openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 0 bootloader.bit
 
 To list all flashing destinations for -a N
