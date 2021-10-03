@@ -30,6 +30,8 @@ module esp32_passthru
                wifi_gpio4 , wifi_gpio2 , wifi_gpio0 ,
   output       wifi_en,
   //inout        wifi_gpio5 // v3.0.x, not available on v3.1.x
+  inout        wifi_sda, wifi_scl, // I2C ESP32
+  inout        gpdi_sda, gpdi_scl, // I2C BOARD
   output       sd_wp // BGA pin exists but not connected on PCB
 );
   // TX/RX passthru
@@ -90,6 +92,46 @@ module esp32_passthru
   assign sd_wp = wifi_gpio0  /* | wifi_gpio5 */ // bootstrapping pins pullups
                | wifi_gpio15 | wifi_gpio14 | wifi_gpio13 | wifi_gpio12 | wifi_gpio4 | wifi_gpio2; // bootstrapping and force pullup sd_cmd, sd_clk, sd_d[3:0] to make SD MMC mode work
   // sd_wp is not connected on PCB, just to prevent optimizer from removing pullups
+
+  // I2C bridge for ESP32 to access onboard RTC
+
+  // slow clock enable pulse 5 MHz
+  localparam bridge_clk_div = 3; // div = 1+2^n, 25/(1+2^2)=5 MHz
+  reg [bridge_clk_div:0] bridge_cnt;
+  always @(posedge clk_25mhz) // 25 MHz
+  begin
+    if(bridge_cnt[bridge_clk_div])
+      bridge_cnt <= 0;
+    else
+      bridge_cnt <= bridge_cnt + 1;
+  end
+  wire clk_bridge_en = bridge_cnt[bridge_clk_div];
+
+  wire [1:0] i2c_sda_i = {gpdi_sda, wifi_sda};
+  wire [1:0] i2c_sda_t;
+  i2c_bridge i2c_sda_bridge_i
+  (
+    .clk(clk_25mhz),
+    .clk_en(clk_bridge_en),
+    .i(i2c_sda_i),
+    .t(i2c_sda_t)
+  );
+  assign gpdi_sda = i2c_sda_t[1] ? 1'bz : 1'b0;
+  assign wifi_sda = i2c_sda_t[0] ? 1'bz : 1'b0;
+
+  wire [1:0] i2c_scl_i = {gpdi_scl, wifi_scl};
+  wire [1:0] i2c_scl_t;
+  i2c_bridge i2c_scl_bridge_i
+  (
+    .clk(clk_25mhz),
+    .clk_en(clk_bridge_en),
+    .i(i2c_scl_i),
+    .t(i2c_scl_t)
+  );
+  assign gpdi_scl = i2c_scl_t[1] ? 1'bz : 1'b0;
+  assign wifi_scl = i2c_scl_t[0] ? 1'bz : 1'b0;
+
+  // LED diagnostics
 
   assign led[7] = wifi_en;      // blue
   //assign led[6] = ~R_prog_release[C_prog_release_timeout]; // green LED ON = ESP32 programming
