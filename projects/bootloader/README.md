@@ -54,9 +54,17 @@ To upload and start user bitstream (fast, few seconds):
 
     dfu-util -a 0 -R -D blink.bit
 
+or
+
+    openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 0 blink.bit
+
 To upgrade bootloader (fast, few seconds)
 
     dfu-util -a 5 -D bootloader.bit
+
+or
+
+    openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 0 bootloader.bit
 
 To list all flashing destinations for -a N
 
