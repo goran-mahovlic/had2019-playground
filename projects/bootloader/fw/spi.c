@@ -291,15 +291,17 @@ flash_block_erase_64k(uint32_t addr)
 }
 
 
-//Note: this is specific to the W25J128 on the Hackaday badges. Other models and types of flash may have
-//a different way of protecting this. This also assumes an ECP5 bootloader partition of 1.5M.
+// NOTE: this is specific to the Winbond W25Q128JV*, see datasheet p.18
+// https://www.winbond.com/resource-files/w25q128jv%20revf%2003272018%20plus.pdf
+// Other models and types of flash may have a different way of protecting this.
+// This also assumes an ECP5 bootloader partition of 2MB (0x000000 - 0x1FFFFF).
 void
 flash_write_protect_bootloader()
 {
 	flash_write_enable_volatile();
-	flash_write_sr(1, 0x34); //Protect lower 1MiB from writing. Not ideal as the bootloader is 1.5M...
+	flash_write_sr(1, 0x30); //Protect lower 2MB from writing.
 	flash_write_enable_volatile();
-	flash_write_sr(2, 0x3); //Quad enable and Status Register Lock enabled.
+	flash_write_sr(2, 0x01); //Status Register Lock enabled.
 }
 
 #define PSRAM_CMD_WRITE	0x02
