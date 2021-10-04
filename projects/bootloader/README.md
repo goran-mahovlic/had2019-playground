@@ -12,6 +12,9 @@ choose bitstream for your board and:
     or
     openFPGALoader -b ulx3s --file-type bin -f multiboot.img
 
+Without user's bitstream, LEDs will blink because bootloader is
+constantly restaring. This is normal for now.
+
 To enter bootloader, hold BTN1 and plug US2
 In bootloader mode, LEDs 0-2 should be ON, other LEDs 3-7 OFF:
 
