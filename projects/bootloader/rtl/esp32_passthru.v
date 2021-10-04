@@ -28,7 +28,7 @@ module esp32_passthru
   input        wifi_gpio15, wifi_gpio14,
   inout        wifi_gpio13, wifi_gpio12,
                wifi_gpio4 , wifi_gpio2 , wifi_gpio0 ,
-  output       wifi_en,
+  inout        wifi_en,
   //inout        wifi_gpio5 // v3.0.x, not available on v3.1.x
   inout        wifi_sda, wifi_scl, // I2C ESP32
   inout        gpdi_sda, gpdi_scl, // I2C BOARD
@@ -79,7 +79,7 @@ module esp32_passthru
 
   //assign wifi_en = S_prog_out[1];
   // assign wifi_en      = R_prog_release[C_prog_release_timeout] ? 1'bz : S_prog_out[1] & R_powerup_en_time[C_powerup_en_time] & ~btn[1]; // holding BTN1 disables ESP32, releasing BTN1 reboots ESP32
-  assign wifi_en      = S_prog_out[1] & R_powerup_en_time[C_powerup_en_time] & ~btn[1]; // holding BTN1 disables ESP32, releasing BTN1 reboots ESP32
+  assign wifi_en      = S_prog_out[1] & R_powerup_en_time[C_powerup_en_time] & ~btn[1] ? 1'bz : 1'b0; // holding BTN1 disables ESP32, releasing BTN1 reboots ESP32
   assign wifi_gpio13  = R_prog_release[C_prog_release_timeout] ? 1'bz : 1'b1;
   assign wifi_gpio12  = R_prog_release[C_prog_release_timeout] ? 1'bz : 1'b0;
   //assign wifi_gpio12  = btn[2]; // experiment with ESP32 VRef 3.3V/1.8V
@@ -89,7 +89,7 @@ module esp32_passthru
   assign wifi_gpio0   = R_prog_release[C_prog_release_timeout] ? 1'bz : S_prog_out[0];
   //assign wifi_gpio0 = S_prog_out[0] & btn[0]; // holding BTN0 will hold gpio0 LOW, signal for ESP32 to take control
 
-  assign sd_wp = wifi_gpio0  /* | wifi_gpio5 */ // bootstrapping pins pullups
+  assign sd_wp = wifi_en     | wifi_gpio0  /* | wifi_gpio5 */ // bootstrapping pins pullups
                | wifi_gpio15 | wifi_gpio14 | wifi_gpio13 | wifi_gpio12 | wifi_gpio4 | wifi_gpio2; // bootstrapping and force pullup sd_cmd, sd_clk, sd_d[3:0] to make SD MMC mode work
   // sd_wp is not connected on PCB, just to prevent optimizer from removing pullups
 
