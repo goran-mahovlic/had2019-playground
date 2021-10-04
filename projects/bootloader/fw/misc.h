@@ -41,6 +41,7 @@ void flashchip_select(int flash_sel);
 
 uint32_t btn_get(void);
 
+void delay(int n);
 void led_on(int n);
 void led_off(int n);
 void led_set_pwm(int n, int level);
