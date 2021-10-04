@@ -298,10 +298,14 @@ flash_block_erase_64k(uint32_t addr)
 void
 flash_write_protect_bootloader()
 {
+	//int i;
+	//for(i = 0; (i < 5000) && (flash_read_sr() & 1); i++);
 	flash_write_enable_volatile();
 	flash_write_sr(1, 0x30); //Protect lower 2MB from writing.
+	//for(i = 0; (i < 5000) && (flash_read_sr() & 1); i++);
 	flash_write_enable_volatile();
 	flash_write_sr(2, 0x01); //Status Register Lock enabled.
+	//for(i = 0; (i < 5000) && (flash_read_sr() & 1); i++);
 }
 
 #define PSRAM_CMD_WRITE	0x02
