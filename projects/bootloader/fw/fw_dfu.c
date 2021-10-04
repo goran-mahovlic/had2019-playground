@@ -119,6 +119,8 @@ void main()
 	psram_read(1, &x[1], 0, 4);
 	printf("PSRAM B: %08x\n", x[1]);
 
+	delay(100); /* wait for stable BTN inputs before reading */
+
 	/* Should we expose the 'bootloader' section as writable? */
 	if ((btn_get() & BTN_START) == 0)
 	{
