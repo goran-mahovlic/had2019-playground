@@ -128,9 +128,11 @@ void main()
 		struct usb_conf_desc *conf = (void*)dfu_stack_desc.conf[0];
 		conf->wTotalLength -= 18;
 
+		#if 0
 		/* Set protection bits so apps also can't accidentally brick the badge. */
 		flashchip_select(FLASHCHIP_INTERNAL);
 		flash_write_protect_bootloader();
+		#endif
 	}
 
 	/* Should we directly boot to app ? */
