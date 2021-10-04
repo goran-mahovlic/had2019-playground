@@ -107,7 +107,7 @@ reboot_now(void)
 // LCD
 // ---------------------------------------------------------------------------
 
-static void delay(int n) {
+void delay(int n) {
 	for (int i=0; i<n; i++) {
 		for (volatile int t=0; t<(1<<11); t++);
 	}
