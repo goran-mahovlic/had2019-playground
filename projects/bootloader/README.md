@@ -99,7 +99,8 @@ bitstream which starts from 0x200000.
 
     From what it protects
 
-FLASH protection protects from accidental
+FLASH protection applied here is based on non-OTP
+bits so it's reversible and it protects from accidental
 overwrite with "fujprog", "esp32ecp5" and
 DFU bootloader itself. "fujprog" will early
 segfault, "esp32ecp5" will stop early at first
@@ -108,8 +109,13 @@ data without error but content will not be
 written.
 
 Current version of "openFPGALoader" will silently
-remove write protection, overwrite bootloader and
-leave FLASH chip unprotected.
+remove non-OTP write protection, overwrite bootloader and
+leave FLASH chip unprotected. 
+
+Generally ISSI FLASH should be always safe and reversible.
+For Winbond users must be careful, because protection can
+be also based on non-reversible OTP status register lock bit
+and in that case, there is no known way to remove protection.
 
 # FLASH the multiboot image
 
