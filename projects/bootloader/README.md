@@ -6,14 +6,16 @@ Source is based on [HAD2019 badge bootloader](https://github.com/smunaut/had2019
 modified to [ULX3S bootloader](https://github.com/emard/had2019-playground)
 
 To install new bootloader for the first time (5 minutes flashing)
-choose bitstream for your board and:
+we have [precompiled binaries at ulx3s-bin](https://github.com/emard/ulx3s-bin/tree/master/fpga/dfu)
+choose image for your board and:
 
     fujprog -j flash multiboot.img
     or
     openFPGALoader -b ulx3s --file-type bin -f multiboot.img
 
-Without user's bitstream, LEDs will blink because bootloader is
-constantly restaring. This is normal for now.
+Bootloader by default skips to user's bitstream.
+If FLASH doesn't contain valid user's bitstream, LEDs will blink
+because bootloader is constantly restaring. This is normal.
 
 To enter bootloader, hold BTN1 and plug US2
 In bootloader mode, LEDs 0-2 should be ON, other LEDs 3-7 OFF:
@@ -119,7 +121,6 @@ and in that case, there is no known way to remove protection.
 
 Multiboot image with bootloader and user bitstream
 should be flashed first and then write protection enabled.
-We have [precompiled binaries at ulx3s-bin](https://github.com/emard/ulx3s-bin/tree/master/fpga/dfu)
 
     fujprog -j flash multiboot.img
     or
