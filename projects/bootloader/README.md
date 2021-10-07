@@ -83,9 +83,10 @@ both are supported by esp32ecp5 and work.
 
     4MB ISSI FLASH chip is not supported
 
-ISSI IS25LP032 4MB is also "supported" but
-chip probably has some bug, it can't protect
-address range where bootloader is.
+ISSI IS25LP032 4MB is actually "supported",
+it has same datasheet and commands as IS25LP128
+but onboard chip probably has some bug, it can't
+protect address range where bootloader is.
 
     Protected range: first 2MB
 
