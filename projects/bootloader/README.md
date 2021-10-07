@@ -119,6 +119,7 @@ and in that case, there is no known way to remove protection.
 
 Multiboot image with bootloader and user bitstream
 should be flashed first and then write protection enabled.
+We have [precompiled binaries at ulx3s-bin](https://github.com/emard/ulx3s-bin/tree/master/fpga/dfu)
 
     openFPGALoader -b ulx3s --file-type bin -f multiboot.img
 
