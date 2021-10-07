@@ -173,10 +173,10 @@ For this there is option in "ecp5wp.py"
 
 After multiboot image is flashed and esp32ecp5 uploaded
 to ESP32, run serial console to ESP32 and "import ecp5wp".
-Tool will detect FPGA, FLASH and print write protection
-status. Last it will print command that should be
-copypasted or typed to enable write protection and
-report status again.
+Tool will detect and identify FPGA and FLASH chips and
+print write protection status. On last line it will print
+command that should be copy-pasted or typed to enable
+write protection.
 
 Tool may complain if FPGA or FLASH is not detected and
 suggest some fix for a typical cause.
