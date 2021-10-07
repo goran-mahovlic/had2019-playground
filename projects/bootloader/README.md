@@ -112,10 +112,10 @@ Current version of "openFPGALoader" will silently
 remove non-OTP write protection, overwrite bootloader and
 leave FLASH chip unprotected. 
 
-Generally ISSI FLASH should be always safe and reversible.
-For Winbond users must be careful, because protection can
-be also based on non-reversible OTP status register lock bit
-and in that case, there is no known way to remove protection.
+ISSI FLASH should be always safe and reversible.
+Winbond FLASH protection can set non-reversible
+OTP status register lock bit and in that case,
+there is no known way to remove protection.
 
 # FLASH the multiboot image
 
