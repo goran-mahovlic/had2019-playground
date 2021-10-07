@@ -187,10 +187,11 @@ bootloader.
 
 Winbond W25Q128JV has OTP (one-time programmable) status-2
 register which comes by factory default in the state suitable
-for this bootloader, but if its "STATUS REGISTER LOCK" bit is
-written 1, then depending on other status registers, the chip
-may be left a in state not suitable for the bootloader or
-permanently read-only.
+for this bootloader, but if its CMP (Complement Protect) or
+SRL (STATUS REGISTER LOCK) bit is written 1, then depending on
+other status registers, the chip may be left a in state not
+suitable for write protection, for the bootloader or permanently
+read-only.
 
     >>> import ecp5wp
     FPGA JTAG IDCODE 0x81113043
