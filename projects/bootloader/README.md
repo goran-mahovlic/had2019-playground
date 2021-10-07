@@ -61,9 +61,7 @@ To upload and start user bitstream, hold BTN1 and plug USB:
 
 To upgrade bootloader, hold BTN1 and BTN2 and plug USB:
 
-    dfu-util -a 5 -R -D bootloader.bit
-    or
-    openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 5 bootloader.bit
+    make dfu_bootloader
 
 To list all flashing destinations for -a N
 
