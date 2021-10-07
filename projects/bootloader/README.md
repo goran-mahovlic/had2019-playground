@@ -104,9 +104,8 @@ bits so it's reversible and protects from accidental
 overwrite with "fujprog", "esp32ecp5" and
 DFU bootloader itself. "fujprog" will early
 segfault, "esp32ecp5" will stop early at first
-block verify, DFU bootloader itself will upload
-data without error but content will not be
-written.
+block verify, bootloader will upload data without
+error but content will not be written.
 
 Current version of "openFPGALoader" will silently
 remove non-OTP write protection, overwrite bootloader and
