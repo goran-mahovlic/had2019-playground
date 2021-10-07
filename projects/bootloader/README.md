@@ -124,7 +124,8 @@ should be flashed first and then write protection enabled.
     openFPGALoader -b ulx3s --file-type bin -f multiboot.img
 
 For protection to be enabled in user-friendly way,
-both bitstreams need to have specific properties.
+both bitstreams contained in multiboot image need to have
+specific properties.
 Tool "ecp5wp.py" from [esp32ecp5](https://github.com/emard/esp32ecp5)
 is used from micropython commandline prompt over the 115200
 serial console, so user bitstream should support it with
