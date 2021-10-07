@@ -100,7 +100,7 @@ bitstream which starts from 0x200000.
     From what it protects
 
 FLASH protection applied here is based on non-OTP
-bits so it's reversible and it protects from accidental
+bits so it's reversible and protects from accidental
 overwrite with "fujprog", "esp32ecp5" and
 DFU bootloader itself. "fujprog" will early
 segfault, "esp32ecp5" will stop early at first
