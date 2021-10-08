@@ -31,6 +31,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// define none or one of:
+`define i2c_bridge_v20
+//`define i2c_bridge_v316
+
 `default_nettype none
 
 module top 
@@ -66,12 +70,18 @@ module top
         output wire sd_wp, // BGA pin exists but not connected on PCB
 
         // ESP32 I2C bridge
+        `ifdef i2c_bridge_v20    // ULX3S v2.x.x or v3.0.x
         inout  wire wifi_gpio16, // i2c sda ESP32 v3.0.x
         inout  wire wifi_gpio17, // i2c scl ESP32 v3.0.x
-        //inout  wire wifi_gpio22, // i2c sda ESP32 v3.1.7
-        //inout  wire wifi_gpio21, // i2c scl ESP32 v3.1.7
         inout  wire gpdi_sda,    // i2c sda RTC and GPDI
         inout  wire gpdi_scl,    // i2c scl RTC and GPDI
+        `endif
+        `ifdef i2c_bridge_v316   // ULX3S v3.1.x
+        inout  wire wifi_gpio22, // i2c sda ESP32 v3.1.6
+        inout  wire wifi_gpio21, // i2c scl ESP32 v3.1.6
+        inout  wire gpdi_sda,    // i2c sda RTC and GPDI
+        inout  wire gpdi_scl,    // i2c scl RTC and GPDI
+        `endif
 
 	// SPI Flash
 	inout  wire flash_mosi,
@@ -188,13 +198,19 @@ module top
 		.wifi_gpio0(wifi_gpio0),
 		.wifi_en(wifi_en),
 		//  wifi_gpio5 // v3.0.x, not available on v3.1.x
+		`ifdef i2c_bridge_v20   // ULX3S v2.x.x or v3.0.x
 		.wifi_sda(wifi_gpio16), // I2C ESP32 for v3.0.x
 		.wifi_scl(wifi_gpio17), // I2C ESP32 for v3.0.x
-		//.wifi_sda(wifi_gpio22), // I2C ESP32 for v3.1.7
-		//.wifi_scl(wifi_gpio21), // I2C ESP32 for v3.1.7
 		.gpdi_sda(gpdi_sda),    // I2C board GPDI and RTC
 		.gpdi_scl(gpdi_scl),    // I2C board GPDI and RTC
-		.sd_wp(sd_wp) // BGA pin exists but not connected on PCB
+		`endif
+		`ifdef i2c_bridge_v316  // ULX3S v3.1.x
+		.wifi_sda(wifi_gpio22), // I2C ESP32 for v3.1.6
+		.wifi_scl(wifi_gpio21), // I2C ESP32 for v3.1.6
+		.gpdi_sda(gpdi_sda),    // I2C board GPDI and RTC
+		.gpdi_scl(gpdi_scl),    // I2C board GPDI and RTC
+		`endif
+		.nc(sd_wp) // BGA pin exists but not connected on PCB
 	);
 
 	// -------- BOOTLOADER CODE ----------
