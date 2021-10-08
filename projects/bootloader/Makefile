@@ -88,7 +88,7 @@ flash_ofl: $(BUILD_TMP)/multiboot.img
 
 # DFU write (upgrade) bootloader bitstream and start it
 # hold BTN1 and BTN2 and plug USB
-dfu_bootloader: $(BUILD_TMP)/multiboot.img
+flash_dfu: $(BUILD_TMP)/multiboot.img
 	dd if=$< of=/tmp/multibot.img bs=2M count=1
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 5 -D /tmp/multibot.img
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 5 -e
@@ -97,7 +97,8 @@ dfu_bootloader: $(BUILD_TMP)/multiboot.img
 # DFU write user bitstream and start it
 # hold BTN1 and plug USB
 dfu_user: $(BUILD_TMP)/blink.bit
-	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -R -D $<
+	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -D $<
+	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -e
 
 # Always try to rebuild the hex file
 .PHONY: fw

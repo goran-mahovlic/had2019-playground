@@ -73,7 +73,7 @@ To exit bootloader and execute user's bistream, use DFU command:
 
 To upgrade bootloader, hold BTN1 and BTN2 and plug USB:
 
-    make dfu_bootloader
+    make flash_dfu
 
 To list all flashing destinations for -a N
 
