@@ -278,15 +278,21 @@ module top
 	assign btn_remap_i = ~ // invert all, RISC-V FW inverts it back
 	{
 	  btn_remap_o[2]   , // BTN2 hold and plug USB to write protect flash and upgrade bootloader
-	  btn_remap_o[1]   , // BTN1 hold and plug USB to stay in bootloader
+	  btn_remap_o[1]     // BTN1 hold and plug USB to stay in bootloader
+	| btn_remap_o[7]   , // DIP SW1=ON is the same as BTN1 hold
 	  btn_remap_o[6:3] , // reserved
-	  1'b0             , // disabled btn_remap_o[7] aka DIP sw[3]
+	  1'b0             , // disabled
 	 ~btn_remap_o[0]     // BTN0 reserved, (BTN0 has inverted logic on ULX3S)
 	};
+	// For buttonless boards use this remapper
+	// and execute user bistream with
+	// dfu-util -a 0 -e
+	//assign btn_remap_i = ~8'b01000000;
+
 	// Peripheral [0] : Misc
 	soc_had_misc had_misc_I (
 		.led(led),
-		.btn({sw[3],btn}),
+		.btn({sw[0],btn}),
 		.btn_remap_o(btn_remap_o),
 		.btn_remap_i(btn_remap_i),
 		.programn(user_programn),

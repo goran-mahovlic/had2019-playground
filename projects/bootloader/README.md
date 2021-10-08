@@ -17,7 +17,7 @@ Bootloader by default skips to user's bitstream.
 If FLASH doesn't contain valid user's bitstream, LEDs will blink
 because bootloader is constantly restaring. This is normal.
 
-To enter bootloader, hold BTN1 and plug US2
+To enter bootloader, hold BTN1 or set DIP SW1=ON and plug US2
 In bootloader mode, LEDs 0-2 should be ON, other LEDs 3-7 OFF:
 
 |   D7   |   D6   |   D5   |   D4   |   D3   |    D2   |    D1   |    D0   |
@@ -60,6 +60,16 @@ To upload and start user bitstream, hold BTN1 and plug USB:
     dfu-util -a 0 -R -D blink.bit
     or
     openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 0 blink.bit
+
+For boards without buttons, compile bootloader with
+BTN1 and BTN2 always "pressed", modify remapper
+in file "top-ulx3s.v"
+
+    assign btn_remap_i = ~8'b1100000;
+
+To exit bootloader and execute user's bistream, use DFU command:
+
+    dfu-util -a 0 -e
 
 To upgrade bootloader, hold BTN1 and BTN2 and plug USB:
 
