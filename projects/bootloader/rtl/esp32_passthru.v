@@ -32,7 +32,7 @@ module esp32_passthru
   //inout        wifi_gpio5 // v3.0.x, not available on v3.1.x
   inout        wifi_sda, wifi_scl, // I2C ESP32
   inout        gpdi_sda, gpdi_scl, // I2C BOARD
-  output       sd_wp // BGA pin exists but not connected on PCB
+  output       nc // BGA pin exists but not connected on PCB
 );
   // TX/RX passthru
   assign ftdi_rxd = wifi_txd;
@@ -88,9 +88,9 @@ module esp32_passthru
   assign wifi_gpio0   = R_prog_release[C_prog_release_timeout] ? 1'bz : S_prog_out[0];
   //assign wifi_gpio0 = S_prog_out[0] & btn[0]; // holding BTN0 will hold gpio0 LOW, signal for ESP32 to take control
 
-  assign sd_wp = wifi_en     | wifi_gpio0  /* | wifi_gpio5 */ // bootstrapping pins pullups
+  assign nc    = wifi_en     | wifi_gpio0  /* | wifi_gpio5 */ // bootstrapping pins pullups
                | wifi_gpio15 | wifi_gpio14 | wifi_gpio13 | wifi_gpio12 | wifi_gpio4 | wifi_gpio2; // bootstrapping and force pullup sd_cmd, sd_clk, sd_d[3:0] to make SD MMC mode work
-  // sd_wp is not connected on PCB, just to prevent optimizer from removing pullups
+  // nc is not connected on PCB, just to prevent optimizer from removing pullups
 
   // I2C bridge for ESP32 to access onboard RTC
 
