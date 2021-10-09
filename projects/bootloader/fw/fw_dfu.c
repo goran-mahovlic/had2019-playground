@@ -143,12 +143,14 @@ void main()
 		reboot_now();
 
 	/* LCD */
+	#if 0
 	lcd_init();
 	lcd_show_logo();
 	lcd_on();
 
 	led_on(LCD_BACKLIGHT);
 	led_set_pwm(LCD_BACKLIGHT, 1);
+	#endif
 
 	/* Enable USB */
 	serial_no_init();
