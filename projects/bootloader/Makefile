@@ -49,7 +49,7 @@ include ../../build/project-rules.mk
 fw/fw_dfu.hex: fw
 	#cp fw/fw_dfu.hex-0x180000 fw/fw_dfu.hex
 	cp fw/fw_dfu.hex-0x200000 fw/fw_dfu.hex
-	#echo make -C fw fw_dfu.hex
+	#make -C fw fw_dfu.hex
 
 $(BUILD_TMP)/boot.hex:
 	$(ECPBRAM) -g $@ -s 2019 -w 32 -d 8192
