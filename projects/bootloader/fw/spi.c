@@ -70,6 +70,85 @@ spi_xfer(unsigned cs, struct spi_xfer_chunk *xfer, unsigned n)
 }
 
 
+/*
+return value:
+0: block should not be erased
+1: block should be erased
+*/
+uint8_t
+spi_xfer_should_block_be_erased(unsigned cs, struct spi_xfer_chunk *xfer, unsigned n)
+{
+	uint8_t should = 0;
+
+	/* CS low */
+	spi_regs->csr &= ~(1 << (16+cs));
+
+	/* Run the chunks */
+	while (n-- != 0 /*&& should == 0*/) {
+		for (int i=0; i<xfer->len; i++)
+		{
+			uint32_t d = (xfer->write ? xfer->data[i] : 0x00) | (xfer->read ? 0x100 : 0x000);
+			spi_regs->data = d;
+			if (xfer->read) {
+				do {
+					d = spi_regs->data;
+				} while (d & 0x80000000);
+				if ( (xfer->data[i] & (uint8_t)d) != xfer->data[i] )
+				{
+					should = 1;
+					//break;
+				}
+			}
+		}
+		xfer++;
+	}
+
+	/* CS high */
+	spi_regs->csr |= (1 << (16+cs));
+	
+	return should;
+}
+
+/*
+return value:
+0: block should not be written
+2: block should be written
+*/
+uint8_t
+spi_xfer_should_block_be_written(unsigned cs, struct spi_xfer_chunk *xfer, unsigned n)
+{
+	uint8_t should = 0;
+
+	/* CS low */
+	spi_regs->csr &= ~(1 << (16+cs));
+
+	/* Run the chunks */
+	while (n-- != 0 /*&& should == 0*/) {
+		for (int i=0; i<xfer->len; i++)
+		{
+			uint32_t d = (xfer->write ? xfer->data[i] : 0x00) | (xfer->read ? 0x100 : 0x000);
+			spi_regs->data = d;
+			if (xfer->read) {
+				do {
+					d = spi_regs->data;
+				} while (d & 0x80000000);
+				if ( xfer->data[i] != (uint8_t)d )
+				{
+					should = 2;
+					//break;
+				}
+			}
+		}
+		xfer++;
+	}
+
+	/* CS high */
+	spi_regs->csr |= (1 << (16+cs));
+	
+	return should;
+}
+
+
 #define FLASH_CMD_RESET_ENABLE		0x66
 #define FLASH_CMD_RESET_EXECUTE		0x99
 #define FLASH_CMD_DEEP_POWER_DOWN	0xb9
@@ -226,6 +305,48 @@ flash_read(void *dst, uint32_t addr, unsigned len)
 	spi_xfer(SPI_CS_FLASH, xfer, 2);
 }
 
+/*
+To save CPU RAM, FLASH is read twice.
+return value of "should":
+0: should do nothing, equal content
+1: should erase
+2: should write
+3: should erase and write
+*/
+uint8_t
+flash_verify(void *dst, uint32_t addr, unsigned len)
+{
+	uint8_t should;
+	unsigned i;
+
+	uint8_t cmd[4] = { FLASH_CMD_READ_DATA, ((addr >> 16) & 0xff), ((addr >> 8) & 0xff), (addr & 0xff)  };
+	struct spi_xfer_chunk xfer[2] = {
+		{ .data = (void*)cmd, .len = 4,   .read = false, .write = true,  },
+		{ .data = (void*)dst, .len = len, .read = true,  .write = false, },
+	};
+	should = spi_xfer_should_block_be_erased(SPI_CS_FLASH, xfer, 2);
+	if(should) /* be erased */
+	{	/*
+		After erase, block will be 0xFF.
+		Check if any of requested data is not 0xFF,
+		then block should be erased and written.
+		*/
+		i = len;
+		while(i-- != 0 && should != 3)
+			if(xfer->data[i] != 0xFF)
+				should = 3;		
+	}
+	else /* should not be erased */
+	{	/*
+		Check if any of requested data is different,
+		then block should be written.
+		*/
+		//should = spi_xfer_should_block_be_erased(SPI_CS_FLASH, xfer, 2);
+		should = spi_xfer_should_block_be_written(SPI_CS_FLASH, xfer, 2);
+	}
+	return should;
+}
+
 void
 flash_page_program(void *src, uint32_t addr, unsigned len)
 {
@@ -303,8 +424,8 @@ flash_write_protect_bootloader()
 	flash_write_enable_volatile();
 	flash_write_sr(1, 0x30); //Protect lower 2MB from writing.
 	//for(i = 0; (i < 5000) && (flash_read_sr() & 1); i++);
-	flash_write_enable_volatile();
-	flash_write_sr(2, 0x01); //Status Register Lock enabled.
+	//flash_write_enable_volatile();
+	//flash_write_sr(2, 0x01); //Status Register Lock enabled.
 	//for(i = 0; (i < 5000) && (flash_read_sr() & 1); i++);
 }
 

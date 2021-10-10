@@ -51,6 +51,7 @@ void flash_unique_id(void *id);
 uint8_t flash_read_sr(void);
 void flash_write_sr(uint8_t srno, uint8_t sr);
 void flash_read(void *dst, uint32_t addr, unsigned len);
+uint8_t flash_verify(void *dst, uint32_t addr, unsigned len);
 void flash_page_program(void *src, uint32_t addr, unsigned len);
 void flash_quad_page_program(void *src, uint32_t addr, unsigned len);
 void flash_sector_erase(uint32_t addr);

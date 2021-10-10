@@ -37,7 +37,14 @@
 #undef DFU_SOF_POLL_LIMIT
 #define DFU_HOST_POLL_MS		5
 
-#if 0
+/* erase size: 4/32/64 KB */
+#define ERASE_SIZE_KB 4
+
+/* max retry number of erase or write attempts at the same sector */
+#define PROG_RETRY 4
+static unsigned prog_retry = PROG_RETRY;
+
+#if 1
 #include "console.h"
 #define DBG_PRINTF(...) printf(__VA_ARGS__)
 #else
@@ -164,11 +171,15 @@ static const struct {
 	{ FLASHCHIP_CART,     0x00000000, 0x00000100 },	/* 6 RTC */
 };
 
+/* DBG print descriptive text */
+char *should_txt[4] = {"do nothing", "erase", "write", "erase and write"};
 
 //static void
 void
 _dfu_tick(void)
 {
+	static uint8_t should = 0; // erase and/or write
+
 	/* Rate limit to once every 10 ms */
 #ifdef DFU_SOF_POLL_LIMIT
 	if (g_dfu.tick++ < DFU_SOF_POLL_LIMIT)
@@ -194,27 +205,50 @@ _dfu_tick(void)
 	/* Select flash chip to operate on. */
 	flashchip_select(g_dfu.flash.selected);
 
+	if (prog_retry == 0)
+	{
+		DBG_PRINTF("Verify error @ %08x - t=%d\n", g_dfu.flash.addr_prog, usb_get_tick());
+		g_dfu.flash.op = FL_IDLE;
+		g_dfu.buf.rd ^= 1;
+		g_dfu.buf.used--;
+		usb_dfu_cb_reboot(); /* TODO: find better way to stop current upload */
+		return;
+	}
+
 	/* Erase */
 	if (g_dfu.flash.op == FL_ERASE) {
 		/* Done ? */
-		if (g_dfu.flash.addr_erase >= (g_dfu.flash.addr_prog + g_dfu.flash.op_len)) {
-			/* Yes, move to programming */
+		unsigned l = g_dfu.flash.op_len - g_dfu.flash.op_ofs;
+		unsigned pl = 256 - ((g_dfu.flash.addr_prog + g_dfu.flash.op_ofs) & 0xff);
+		if (l > pl)
+			l = pl;
+		should = flash_verify(&g_dfu.buf.data[g_dfu.buf.rd][g_dfu.flash.op_ofs], g_dfu.flash.addr_prog, ERASE_SIZE_KB*1024);
+		DBG_PRINTF("Verify @ %08x should=%d (%s)\n", g_dfu.flash.addr_prog, should, should_txt[should]);
+		//if (g_dfu.flash.addr_erase >= (g_dfu.flash.addr_prog + g_dfu.flash.op_len)) {
+		if( (should & 1) == 0 ) { /* should not erase ? */
+			/* no erasing, move to programming */
+			g_dfu.flash.addr_erase = g_dfu.flash.addr_prog + ERASE_SIZE_KB*1024; /* skip as if erased */
 			g_dfu.flash.op = FL_PROGRAM;
-			DBG_PRINTF("Erase done - t=%d\n", usb_get_tick());
-		} else{
-			/* No, issue the next command */
-#if 0
-			DBG_PRINTF("Erase start 4k @ %08x - t=%d\n", g_dfu.flash.addr_erase, usb_get_tick());
+			if ( (should & 2) != 0) /* should write */
+				DBG_PRINTF("Erase done, %d retries left - t=%d\n", prog_retry, usb_get_tick());
+		} else {
+			/* erase */
+			if(prog_retry)
+				prog_retry--;
+			g_dfu.flash.addr_erase = g_dfu.flash.addr_prog;
+			DBG_PRINTF("Erase start %d retries left %dk @ %08x - t=%d\n", 
+				prog_retry, ERASE_SIZE_KB, g_dfu.flash.addr_erase, usb_get_tick());
+#if ERASE_SIZE_KB == 4
 			flash_write_enable();
 			flash_sector_erase(g_dfu.flash.addr_erase);
 			g_dfu.flash.addr_erase += 4096;
-#elif 0
-			DBG_PRINTF("Erase start 32k @ %08x - t=%d\n", g_dfu.flash.addr_erase, usb_get_tick());
+#endif
+#if ERASE_SIZE_KB == 32
 			flash_write_enable();
 			flash_block_erase_32k(g_dfu.flash.addr_erase);
 			g_dfu.flash.addr_erase += 32768;
-#else
-			DBG_PRINTF("Erase start 64k @ %08x - t=%d\n", g_dfu.flash.addr_erase, usb_get_tick());
+#endif
+#if ERASE_SIZE_KB == 64
 			flash_write_enable();
 			flash_block_erase_64k(g_dfu.flash.addr_erase);
 			g_dfu.flash.addr_erase += 65536;
@@ -224,13 +258,26 @@ _dfu_tick(void)
 
 	/* Programming */
 	if (g_dfu.flash.op == FL_PROGRAM) {
-		/* Done ? */
-		if (g_dfu.flash.op_ofs == g_dfu.flash.op_len) {
+		if ( (should & 2) == 0 ) /* if should not write, that means verify ok */
+		{
 			/* Yes ! */
-			g_dfu.flash.op = FL_IDLE;
-			g_dfu.flash.addr_prog += g_dfu.flash.op_len;
+			prog_retry = PROG_RETRY; /* reset retry counter */
+			g_dfu.flash.addr_prog += g_dfu.flash.op_len; /* advance address */
 			g_dfu.buf.rd ^= 1;
 			g_dfu.buf.used--;
+			g_dfu.flash.op = FL_IDLE;
+		}
+		else if (g_dfu.flash.op_ofs == g_dfu.flash.op_len) { /* program done? */
+			/* Yes ! */
+			if(prog_retry)
+				prog_retry--;
+			g_dfu.flash.op_len = 4096;
+			g_dfu.flash.op_ofs = 0;
+			#if 0
+			g_dfu.buf.rd ^= 1;
+			g_dfu.buf.used--;
+			#endif
+			g_dfu.flash.op = FL_IDLE; /* go back and verify again */
 		} else {
 			/* Max len */
 			unsigned l = g_dfu.flash.op_len - g_dfu.flash.op_ofs;
