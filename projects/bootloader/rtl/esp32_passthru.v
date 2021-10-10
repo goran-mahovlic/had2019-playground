@@ -4,6 +4,8 @@
 `default_nettype none
 module esp32_passthru
 #(
+  // BTN0 delay PROGRAMN prevents exit immediately
+  parameter C_progndelay = 16, // 2^n clocks
   // time to hold EN down after power up,
   // 0 to disable (normal)
   // 9 or more to reset ESP32 at power up
@@ -32,6 +34,7 @@ module esp32_passthru
   //inout        wifi_gpio5 // v3.0.x, not available on v3.1.x
   inout        wifi_sda, wifi_scl, // I2C ESP32
   inout        gpdi_sda, gpdi_scl, // I2C BOARD
+  inout        user_programn, // to exit this bitstream
   output       nc // BGA pin exists but not connected on PCB
 );
   // TX/RX passthru
@@ -92,7 +95,7 @@ module esp32_passthru
                | wifi_gpio15 | wifi_gpio14 | wifi_gpio13 | wifi_gpio12 | wifi_gpio4 | wifi_gpio2; // bootstrapping and force pullup sd_cmd, sd_clk, sd_d[3:0] to make SD MMC mode work
   // nc is not connected on PCB, just to prevent optimizer from removing pullups
 
-  // I2C bridge for ESP32 to access onboard RTC
+  // i2c bridge for ESP32 to access onboard RTC
 
   // slow clock enable pulse 5 MHz
   localparam bridge_clk_div = 3; // div = 1+2^n, 25/(1+2^2)=5 MHz
@@ -129,6 +132,13 @@ module esp32_passthru
   );
   assign gpdi_scl = i2c_scl_t[1] ? 1'bz : 1'b0;
   assign wifi_scl = i2c_scl_t[0] ? 1'bz : 1'b0;
+
+  // BTN0 exit this bitstream
+  // delay prevents immediate exit
+  reg [C_progndelay:0] delay_programn = 0;
+  always @(posedge clk_25mhz)
+    delay_programn <= btn[0] ? 0 : delay_programn+1;
+  assign user_programn = delay_programn[C_progndelay] ? 1'b0 : 1'bz;
 
   // LED diagnostics
 
