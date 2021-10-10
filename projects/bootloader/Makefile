@@ -64,10 +64,11 @@ $(BUILD_TMP)/$(PROJ).bit $(BUILD_TMP)/$(PROJ).svf: fw/fw_dfu.hex $(BUILD_TMP)/$(
 		--svf $(BUILD_TMP)/$(PROJ).svf --svf-rowsize 100000 \
 		--bit $(BUILD_TMP)/$(PROJ).bit
 
+include ../../build/ulx3s-passthru-inc.mk
 
-$(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit
+$(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit build-tmp/passthru.bit
 	ecpmulti                           --input $(BUILD_TMP)/$(PROJ).bit \
-	  --address $(USER_BITSTREAM_ADDR) --input $(BUILD_TMP)/$(PROJ).bit \
+	  --address $(USER_BITSTREAM_ADDR) --input build-tmp/passthru.bit \
 	  --flashsize 128 \
 	  --output $@
 
@@ -88,15 +89,16 @@ flash_ofl: $(BUILD_TMP)/multiboot.img
 
 # DFU write (upgrade) bootloader bitstream and start it
 # hold BTN1 and BTN2 and plug USB
-flash_dfu: $(BUILD_TMP)/multiboot.img
+flash_dfu: $(BUILD_TMP)/multiboot.img build-tmp/passthru.bit
 	dd if=$< of=/tmp/multibot.img bs=2M count=1
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 5 -D /tmp/multibot.img
+	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -D build-tmp/passthru.bit
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 5 -e
 	rm /tmp/multibot.img
 
-# DFU write user bitstream and start it
+# DFU write user passthru bitstream and start it
 # hold BTN1 and plug USB
-dfu_user: $(BUILD_TMP)/blink.bit
+pass_dfu: build-tmp/passthru.bit
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -D $<
 	$(DFU_UTIL) -d 1d50:614a,1d50:614b -a 0 -e
 
