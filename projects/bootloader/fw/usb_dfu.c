@@ -218,19 +218,14 @@ _dfu_tick(void)
 	/* Erase */
 	if (g_dfu.flash.op == FL_ERASE) {
 		/* Done ? */
-		unsigned l = g_dfu.flash.op_len - g_dfu.flash.op_ofs;
-		unsigned pl = 256 - ((g_dfu.flash.addr_prog + g_dfu.flash.op_ofs) & 0xff);
-		if (l > pl)
-			l = pl;
-		should = flash_verify(&g_dfu.buf.data[g_dfu.buf.rd][g_dfu.flash.op_ofs], g_dfu.flash.addr_prog, ERASE_SIZE_KB*1024);
+		should = flash_verify(g_dfu.buf.data[g_dfu.buf.rd], g_dfu.flash.addr_prog, ERASE_SIZE_KB<<10);
 		DBG_PRINTF("Verify @ %08x should=%d (%s)\n", g_dfu.flash.addr_prog, should, should_txt[should]);
-		//if (g_dfu.flash.addr_erase >= (g_dfu.flash.addr_prog + g_dfu.flash.op_len)) {
-		if( (should & 1) == 0 ) { /* should not erase ? */
+		if (should == 0) /* verify ok? */
+			prog_retry = PROG_RETRY; /* yes, reset retry counter */
+		if ( (should & 1) == 0 ) { /* should not erase ? */
 			/* no erasing, move to programming */
-			g_dfu.flash.addr_erase = g_dfu.flash.addr_prog + ERASE_SIZE_KB*1024; /* skip as if erased */
+			g_dfu.flash.addr_erase = g_dfu.flash.addr_prog + (ERASE_SIZE_KB<<10); /* skip as if erased */
 			g_dfu.flash.op = FL_PROGRAM;
-			if ( (should & 2) != 0) /* should write */
-				DBG_PRINTF("Erase done, %d retries left - t=%d\n", prog_retry, usb_get_tick());
 		} else {
 			/* erase */
 			if(prog_retry)
@@ -261,7 +256,6 @@ _dfu_tick(void)
 		if ( (should & 2) == 0 ) /* if should not write, that means verify ok */
 		{
 			/* Yes ! */
-			prog_retry = PROG_RETRY; /* reset retry counter */
 			g_dfu.flash.addr_prog += g_dfu.flash.op_len; /* advance address */
 			g_dfu.buf.rd ^= 1;
 			g_dfu.buf.used--;
