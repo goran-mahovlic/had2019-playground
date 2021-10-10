@@ -44,7 +44,7 @@
 #define PROG_RETRY 4
 static unsigned prog_retry = PROG_RETRY;
 
-#if 1
+#if 0
 #include "console.h"
 #define DBG_PRINTF(...) printf(__VA_ARGS__)
 #else
