@@ -69,22 +69,23 @@ spi_xfer(unsigned cs, struct spi_xfer_chunk *xfer, unsigned n)
 	spi_regs->csr |= (1 << (16+cs));
 }
 
-
 /*
 return value:
-0: block should not be erased
-1: block should be erased
+0: should do nothing, equal content
+1: should erase
+2: should write
+3: should erase and write
 */
 uint8_t
-spi_xfer_should_block_be_erased(unsigned cs, struct spi_xfer_chunk *xfer, unsigned n)
+spi_xfer_verify(unsigned cs, struct spi_xfer_chunk *xfer, unsigned n)
 {
-	uint8_t should = 0;
+	uint8_t should_e = 0, should_ew = 0, should_w = 0;
 
 	/* CS low */
 	spi_regs->csr &= ~(1 << (16+cs));
 
 	/* Run the chunks */
-	while (n-- != 0 /*&& should == 0*/) {
+	while (n-- != 0) {
 		for (int i=0; i<xfer->len; i++)
 		{
 			uint32_t d = (xfer->write ? xfer->data[i] : 0x00) | (xfer->read ? 0x100 : 0x000);
@@ -93,11 +94,18 @@ spi_xfer_should_block_be_erased(unsigned cs, struct spi_xfer_chunk *xfer, unsign
 				do {
 					d = spi_regs->data;
 				} while (d & 0x80000000);
-				if ( (xfer->data[i] & (uint8_t)d) != xfer->data[i] )
-				{
-					should = 1;
-					//break;
-				}
+				/*
+if request is 1 at flash 0, block should be erased
+flash 1 can become 0 by write and doesn't need erase, but
+flash 0 can become 1 only by erase
+				*/
+				should_e  |= (xfer->data[i]  & (uint8_t)d) != xfer->data[i] ? 1 : 0;
+				should_w  |=  xfer->data[i] != (uint8_t)d                   ? 2 : 0;
+				/*
+erase sets all to 0xFF. after erase, if request is not 0xFF
+then block should be written
+				*/
+				should_ew |=  xfer->data[i] != 0xFF                         ? 3 : 1;
 			}
 		}
 		xfer++;
@@ -105,47 +113,11 @@ spi_xfer_should_block_be_erased(unsigned cs, struct spi_xfer_chunk *xfer, unsign
 
 	/* CS high */
 	spi_regs->csr |= (1 << (16+cs));
-	
-	return should;
-}
 
-/*
-return value:
-0: block should not be written
-2: block should be written
-*/
-uint8_t
-spi_xfer_should_block_be_written(unsigned cs, struct spi_xfer_chunk *xfer, unsigned n)
-{
-	uint8_t should = 0;
-
-	/* CS low */
-	spi_regs->csr &= ~(1 << (16+cs));
-
-	/* Run the chunks */
-	while (n-- != 0 /*&& should == 0*/) {
-		for (int i=0; i<xfer->len; i++)
-		{
-			uint32_t d = (xfer->write ? xfer->data[i] : 0x00) | (xfer->read ? 0x100 : 0x000);
-			spi_regs->data = d;
-			if (xfer->read) {
-				do {
-					d = spi_regs->data;
-				} while (d & 0x80000000);
-				if ( xfer->data[i] != (uint8_t)d )
-				{
-					should = 2;
-					//break;
-				}
-			}
-		}
-		xfer++;
-	}
-
-	/* CS high */
-	spi_regs->csr |= (1 << (16+cs));
-	
-	return should;
+	if(should_e) /* 1: should be erased */
+	  return should_ew; /* 1->3: should be erased and written */
+	else
+	  return should_w; /* 0->2: should be written */
 }
 
 
@@ -306,8 +278,7 @@ flash_read(void *dst, uint32_t addr, unsigned len)
 }
 
 /*
-To save CPU RAM, FLASH is read twice.
-return value of "should":
+return value:
 0: should do nothing, equal content
 1: should erase
 2: should write
@@ -316,35 +287,12 @@ return value of "should":
 uint8_t
 flash_verify(void *dst, uint32_t addr, unsigned len)
 {
-	uint8_t should;
-	unsigned i;
-
 	uint8_t cmd[4] = { FLASH_CMD_READ_DATA, ((addr >> 16) & 0xff), ((addr >> 8) & 0xff), (addr & 0xff)  };
 	struct spi_xfer_chunk xfer[2] = {
 		{ .data = (void*)cmd, .len = 4,   .read = false, .write = true,  },
 		{ .data = (void*)dst, .len = len, .read = true,  .write = false, },
 	};
-	should = spi_xfer_should_block_be_erased(SPI_CS_FLASH, xfer, 2);
-	if(should) /* be erased */
-	{	/*
-		After erase, block will be 0xFF.
-		Check if any of requested data is not 0xFF,
-		then block should be erased and written.
-		*/
-		i = len;
-		while(i-- != 0 && should != 3)
-			if(xfer->data[i] != 0xFF)
-				should = 3;		
-	}
-	else /* should not be erased */
-	{	/*
-		Check if any of requested data is different,
-		then block should be written.
-		*/
-		//should = spi_xfer_should_block_be_erased(SPI_CS_FLASH, xfer, 2);
-		should = spi_xfer_should_block_be_written(SPI_CS_FLASH, xfer, 2);
-	}
-	return should;
+	return spi_xfer_verify(SPI_CS_FLASH, xfer, 2);
 }
 
 void
