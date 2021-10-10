@@ -32,8 +32,15 @@
  */
 
 // define none or one of:
+`ifdef BOARD_ULX3S_V20
 `define i2c_bridge_v20
-//`define i2c_bridge_v316
+`endif
+`ifdef BOARD_ULX3S_V314
+`define i2c_bridge_v316
+`endif
+`ifdef BOARD_ULX3S_V317
+`define i2c_bridge_v316
+`endif
 
 `default_nettype none
 
