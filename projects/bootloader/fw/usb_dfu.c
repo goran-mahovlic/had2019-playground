@@ -37,7 +37,7 @@
 #undef DFU_SOF_POLL_LIMIT
 #define DFU_HOST_POLL_MS		5
 
-/* erase size: 4/32/64 KB */
+/* erase size: 4/32/64 KB (CPU RAM allows only 4KB) */
 #define ERASE_SIZE_KB 4
 
 /* max retry number of erase or write attempts at the same sector */
