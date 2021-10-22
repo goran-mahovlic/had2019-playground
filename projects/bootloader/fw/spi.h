@@ -58,6 +58,7 @@ void flash_sector_erase(uint32_t addr);
 void flash_block_erase_32k(uint32_t addr);
 void flash_block_erase_64k(uint32_t addr);
 void flash_write_protect_bootloader();
+void flash_write_unprotect_bootloader();
 
 void psram_read(int id, void *dst, uint32_t addr, unsigned len);
 void psram_write(int id, void *dst, uint32_t addr, unsigned len);

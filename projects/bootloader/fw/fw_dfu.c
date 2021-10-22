@@ -124,14 +124,27 @@ void main()
 	/* Should we expose the 'bootloader' section as writable? */
 	if ((btn_get() & BTN_START) == 0)
 	{
+		/* 'bootloader' should be write protected */
+		/* soft protection */
 		/* We patch the descriptor length ... in RO section but not really RO */
 		struct usb_conf_desc *conf = (void*)dfu_stack_desc.conf[0];
 		conf->wTotalLength -= 18;
-
-		#if 0
+		//printf("write protect bootloader\n");
+		#if 1
+		/* hard protection */
 		/* Set protection bits so apps also can't accidentally brick the badge. */
 		flashchip_select(FLASHCHIP_INTERNAL);
 		flash_write_protect_bootloader();
+		#endif
+	}
+	else
+	{
+		/* 'bootloader' shoud be writable */
+		//printf("write unprotect bootloader\n");
+		#if 1
+		/* hard unprotection */
+		flashchip_select(FLASHCHIP_INTERNAL);
+		flash_write_unprotect_bootloader();
 		#endif
 	}
 
