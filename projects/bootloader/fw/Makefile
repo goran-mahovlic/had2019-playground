@@ -1,6 +1,6 @@
 BOARD ?= had2019-badge
 CROSS ?= riscv-none-embed-
-#wget -c https://github.com/xpack-dev-tools/riscv-none-embed-gcc-xpack/releases/downl
+#wget -c https://github.com/xpack-dev-tools/riscv-none-embed-gcc-xpack/releases/download/v8.3.0-1.2/xpack-riscv-none-embed-gcc-8.3.0-1.2-linux-x64.tar.gz
 #CROSS ?= /tmp/xpack-riscv-none-embed-gcc-8.3.0-1.2/bin/riscv-none-embed-
 CC = $(CROSS)gcc
 OBJCOPY = $(CROSS)objcopy
