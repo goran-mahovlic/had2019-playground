@@ -440,10 +440,8 @@ issi_flash_write_protect(uint8_t issi_sr_wanted)
 	if((issi_fr & 0x02) != issi_fr_wanted)
 	{
 		printf("Writing FR (OTP)\n");
-		#if 0
 		flash_write_enable();
-		flash_write_reg(0x42, winbond_fr_wanted); // set write protection scheme
-		#endif
+		flash_write_reg(0x42, issi_fr_wanted); // set write protection scheme
 		while(flash_read_sr() & 1);
 	}
 }
