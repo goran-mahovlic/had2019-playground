@@ -391,7 +391,7 @@ flash_block_erase_64k(uint32_t addr)
 void
 winbond_flash_write_protect(uint8_t winbond_sr1_wanted)
 {
-	// winbond registers
+	// Winbond registers
 	uint8_t winbond_sr1;
 	uint8_t winbond_sr3;
 	const uint8_t winbond_sr3_wanted = 0x60;
@@ -420,7 +420,7 @@ winbond_flash_write_protect(uint8_t winbond_sr1_wanted)
 void
 issi_flash_write_protect(uint8_t issi_sr_wanted)
 {
-	// winbond registers
+	// ISSI registers
 	uint8_t issi_sr;
 	uint8_t issi_fr;
 	const uint8_t issi_fr_wanted = 0x02; // OTP this bit has to be set
@@ -451,7 +451,7 @@ flash_write_protect_bootloader()
 {
 	uint32_t manuf_id = 0;
 	flash_manuf_id(&manuf_id);
-	printf("Protect manufacturer id : 0x%06X\n", manuf_id);
+	printf("Protect manufacturer ID : 0x%06X\n", manuf_id);
 	// protect lower 2MB
 	if(manuf_id == 0x1840EF)
 		winbond_flash_write_protect(0x30);
@@ -464,7 +464,7 @@ flash_write_unprotect_bootloader()
 {
 	uint32_t manuf_id = 0;
 	flash_manuf_id(&manuf_id);
-	printf("Unprotect manufacturer id : 0x%06X\n", manuf_id);
+	printf("Unprotect manufacturer ID : 0x%06X\n", manuf_id);
 	// unprotect all
 	if(manuf_id == 0x1840EF)
 		winbond_flash_write_protect(0);
