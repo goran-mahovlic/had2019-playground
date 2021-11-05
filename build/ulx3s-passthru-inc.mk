@@ -23,3 +23,5 @@ $(BUILDDIR)/$(PROJ_PASSTHRU).config: $(PASSTHRU_PIN_DEF) $(BUILDDIR)/$(PROJ_PASS
 $(BUILDDIR)/$(PROJ_PASSTHRU).bit: $(BUILDDIR)/$(PROJ_PASSTHRU).config
 	ecppack --compress $^ $@
 
+$(BUILDDIR)/$(PROJ_PASSTHRU).bit.gz: $(BUILDDIR)/$(PROJ_PASSTHRU).bit
+	./gzip4k.py $< $@

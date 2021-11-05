@@ -72,7 +72,7 @@ $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit build-tmp/passthru.bit
 	  --flashsize 128 \
 	  --output $@
 
-passthru: build-tmp/passthru.bit
+passthru: build-tmp/passthru.bit.gz
 
 # to apply non-serdes bootloader bitstream to serdes 85F chip
 # --input-idcode  0x81113043 \
