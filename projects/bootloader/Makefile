@@ -72,6 +72,9 @@ $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit build-tmp/passthru.bit
 	  --flashsize 128 \
 	  --output $@
 
+$(BUILD_TMP)/multiboot.img.gz: $(BUILD_TMP)/multiboot.img
+	./gzip4k.py $< $@
+
 passthru: build-tmp/passthru.bit.gz
 
 # to apply non-serdes bootloader bitstream to serdes 85F chip
@@ -79,7 +82,7 @@ passthru: build-tmp/passthru.bit.gz
 # --output-idcode 0x81113043 \
 
 # make multiboot image
-multi: $(BUILD_TMP)/multiboot.img
+multi: $(BUILD_TMP)/multiboot.img.gz
 
 # flash multiboot image with fujprog
 flash: $(BUILD_TMP)/multiboot.img
