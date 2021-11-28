@@ -2,9 +2,15 @@
 PROJ = bootloader
 
 # Target config
-BOARD ?= ulx3s-v20
-#BOARD ?= ulx3s-v314
-#BOARD ?= ulx3s-v317
+
+MODEL ?= ulx3s
+#MODEL ?= ulx4m
+
+BOARD ?= $(MODEL)-v20
+#BOARD ?= $(MODEL)-v314
+#BOARD ?= $(MODEL)-v317
+#BOARD ?= $(MODEL)-v002
+
 DEVICE = 12k
 PACKAGE = CABGA381
 SPEEDGRADE = 6
@@ -30,13 +36,13 @@ PROJ_RTL_SRCS := $(addprefix rtl/, \
 PROJ_SIM_SRCS := $(addprefix sim/, \
 	spiflash.v \
 )
-PROJ_SIM_SRCS += rtl/top-ulx3s.v
+PROJ_SIM_SRCS += rtl/top-$(MODEL).v
 PROJ_TESTBENCHES := \
 	dfu_helper_tb \
 	top_tb
 PROJ_PREREQ = \
 	$(BUILD_TMP)/boot.hex
-PROJ_TOP_SRC := rtl/top-ulx3s.v
+PROJ_TOP_SRC := rtl/top-$(MODEL).v
 PROJ_TOP_MOD := top
 
 
