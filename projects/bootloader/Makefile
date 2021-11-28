@@ -47,7 +47,6 @@ include ../../build/project-rules.mk
 
 # Custom rules
 fw/fw_dfu.hex: fw
-	#cp fw/fw_dfu.hex-0x180000 fw/fw_dfu.hex
 	#cp fw/fw_dfu.hex-0x200000 fw/fw_dfu.hex
 	make -C fw fw_dfu.hex
 
@@ -71,15 +70,15 @@ $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit build-tmp/passthru.bit
 	  --address $(USER_BITSTREAM_ADDR) --input build-tmp/passthru.bit \
 	  --flashsize 128 \
 	  --output $@
+# to apply non-serdes bootloader bitstream to serdes 85F chip
+# --input-idcode  0x81113043 \
+# --output-idcode 0x81113043 \
+
 
 $(BUILD_TMP)/multiboot.img.gz: $(BUILD_TMP)/multiboot.img
 	./gzip4k.py $< $@
 
 passthru: build-tmp/passthru.bit.gz
-
-# to apply non-serdes bootloader bitstream to serdes 85F chip
-# --input-idcode  0x81113043 \
-# --output-idcode 0x81113043 \
 
 # make multiboot image
 multi: $(BUILD_TMP)/multiboot.img.gz
