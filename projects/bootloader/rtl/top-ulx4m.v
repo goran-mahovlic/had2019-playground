@@ -60,10 +60,10 @@ module top
 	output wire [3:0] led,
 
 	// Buttons
-	input  wire [2:1] btn,
+	input  wire [6:0] btn,
 	
 	// DIP switches
-	//input  wire [3:0] sw,
+	input  wire sw,
 	
 	// Debug or esp32 passthru UART
 	input  wire ftdi_txd,
@@ -164,7 +164,7 @@ module top
 	wire flash_cs;
 
 	// BTN remapper
-	wire [2:1] btn_remap_o, btn_remap_i;
+	wire [7:0] btn_remap_o, btn_remap_i;
 
 	// Clocks / Reset
 	wire clk_48m;
@@ -305,8 +305,8 @@ module top
 	assign btn_remap_i = ~ // invert all, RISC-V FW inverts it back
 	{
 	  btn_remap_o[2]   , // BTN2 hold and plug USB to write protect flash and upgrade bootloader
-	  btn_remap_o[1]     // BTN1 hold and plug USB to stay in bootloader
-	| btn_remap_o[7]   , // DIP SW1=ON is the same as BTN1 hold
+	  btn_remap_o[1]   , // BTN1 hold and plug USB to stay in bootloader
+//	| btn_remap_o[7]   , // DIP SW1=ON is the same as BTN1 hold
 	  btn_remap_o[6:3] , // reserved
 	  1'b0             , // disabled
 	 ~btn_remap_o[0]     // BTN0 reserved, (BTN0 has inverted logic on ULX3S)
@@ -319,7 +319,7 @@ module top
 	// Peripheral [0] : Misc
 	soc_had_misc had_misc_I (
 		.led(led),
-		.btn({btn}),
+		.btn({sw,btn}),
 		.btn_remap_o(btn_remap_o),
 		.btn_remap_i(btn_remap_i),
 		.programn(user_programn),
