@@ -2,10 +2,10 @@
 FER-RADIONA-EMARD
 ULX3S FPGA (DFU)
 DFU
-0x200000 User Bitstream
-0x340000 Saxonsoc fw_jump
-0x380000 Saxonsoc u-boot
-0x400000 User Data
-0x800000 User Data
-0x000000 Bootloader Bitstream
-0x000000 RTC
+0x200000-0xFFFFFF User Bitstream
+0x340000-0x35FFFF Saxonsoc fw_jump
+0x360000-0x3FFFFF Saxonsoc u-boot
+0x400000-0xFFFFFF User Data
+0x800000-0xFFFFFF User Data
+0x000000-0x1FFFFF Bootloader Bitstream
+0x000000-0x0000FF RTC

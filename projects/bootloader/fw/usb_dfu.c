@@ -163,8 +163,8 @@ static const struct {
 	uint32_t end;
 } dfu_zones[7] = {
 	{ FLASHCHIP_INTERNAL, 0x00200000, 0x01000000 },	/* 0 user bitstream and data */
-	{ FLASHCHIP_INTERNAL, 0x00340000, 0x00380000 },	/* 1 saxonsoc fw_jump  */
-	{ FLASHCHIP_INTERNAL, 0x00380000, 0x01000000 },	/* 2 saxonsoc u-boot */
+	{ FLASHCHIP_INTERNAL, 0x00340000, 0x00360000 },	/* 1 saxonsoc fw_jump  */
+	{ FLASHCHIP_INTERNAL, 0x00360000, 0x00400000 },	/* 2 saxonsoc u-boot */
 	{ FLASHCHIP_INTERNAL, 0x00400000, 0x01000000 },	/* 3 user data */
 	{ FLASHCHIP_INTERNAL, 0x00800000, 0x01000000 },	/* 4 user data */
 	{ FLASHCHIP_INTERNAL, 0x00000000, 0x00200000 },	/* 5 bootloader bitstream */
