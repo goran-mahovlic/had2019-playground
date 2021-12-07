@@ -82,6 +82,52 @@ To list all flashing destinations for -a N
 
     dfu-util -l
 
+# Install to FLASH
+
+Multiboot image with bootloader and user bitstream
+should be flashed first and then write protection enabled.
+
+    fujprog -j flash multiboot.img
+    or
+    openFPGALoader -b ulx3s --file-type bin -f multiboot.img
+
+Bootloader write protects itself (first 2MB) of FLASH for
+Winbond W25Q128 or ISSI IS25LP128 chips. For other chips,
+it will not attempt to protect because protection registers
+are vendor-specific.
+
+To have interactive access to ESP32 micropython,
+bitstream can also work as usb-serial console and
+connect RS232 control lines to allow programming
+of ESP32.
+
+It is desirable to make bitstreams so that ESP32
+does not reboot by switching from bootloader to user
+bitstream and back. This can be done by 3-state driving
+wifi_en and other ESP32 strapping pins in both bootloader
+and user bitstream.
+
+Boards v2.x.x and v3.0.x have the same ESP32 pinout but
+new v3.1.x is different at ESP32 pinout.
+Current default is for v2.x.x and v3.0.x.
+
+For v3.1.x adjust ESP32-JTAG pinout in "ecp5wp.py",
+in bitstreams adjust ESP32-i2c pinout (gpio16,17) in toplevel.
+In the makefile, select board name because it
+also defines constraints file with pinout.
+
+    BOARD ?= ulx3s-v20
+    #BOARD ?= ulx3s-v317
+
+Some boards have problems getting JTAG-FLASH access without
+discarding running bitstream. This problem manifestst as
+flash ID reading as FF FF FF ...
+In this case bitstream must be discarded, but ESP32
+should not reboot after reloading the bitstream from FLASH.
+For this there is option in "ecp5wp.py"
+
+    discard=1
+
 # Write Protecting Bootloader
 
 To prevent accidental overwrite,
@@ -130,58 +176,6 @@ Winbond FLASH protection can set non-reversible
 OTP status register lock bit and in that case,
 there is no known way to remove protection.
 
-# FLASH the multiboot image
-
-Multiboot image with bootloader and user bitstream
-should be flashed first and then write protection enabled.
-
-    fujprog -j flash multiboot.img
-    or
-    openFPGALoader -b ulx3s --file-type bin -f multiboot.img
-
-For protection to be enabled in user-friendly way,
-both bitstreams contained in multiboot image need to have
-specific properties.
-Tool "ecp5wp.py" from [esp32ecp5](https://github.com/emard/esp32ecp5)
-is used from micropython commandline prompt over the 115200
-serial console, so user bitstream should support it with
-ESP32 "passthru" function and JTAG-FLASH access.
-
-It is very important that user bitstream allows access
-from JTAG to FLASH while bitstream is running because
-it is best if bitstream keeps working as usb-serial console.
-
-This is done by compiling user bitstream with
-"SYSCONFIG MASTER_SPI_PORT=ENABLE" in ".lpf" file
-and without "USRMCLK" module in ".v" files. 
-
-It is desirable to make bitstreams so that ESP32
-does not reboot by switching from bootloader to user
-bitstream and back. This can be done by 3-state driving
-wifi_en and other ESP32 strapping pins in both bootloader
-and user bitstream.
-
-Boards v2.x.x and v3.0.x have the same ESP32 pinout but
-new v3.1.x is different at ESP32 pinout.
-Current default is for v2.x.x and v3.0.x.
-
-For v3.1.x adjust ESP32-JTAG pinout in "ecp5wp.py",
-in bitstreams adjust ESP32-i2c pinout (gpio16,17) in toplevel.
-In the makefile, select board name because it
-also defines constraints file with pinout.
-
-    BOARD ?= ulx3s-v20
-    #BOARD ?= ulx3s-v317
-
-Some boards have problems getting JTAG-FLASH access without
-discarding running bitstream. This problem manifestst as
-flash ID reading as FF FF FF ...
-In this case bitstream must be discarded, but ESP32
-should not reboot after reloading the bitstream from FLASH.
-For this there is option in "ecp5wp.py"
-
-    discard=1
-
 # Using "ecp5wp.py" to write protect
 
 After multiboot image is flashed and esp32ecp5 uploaded
@@ -190,6 +184,13 @@ Tool will detect and identify FPGA and FLASH chips and
 print write protection status. On last line it will print
 command that should be copy-pasted or typed to enable
 write protection.
+
+It is very important to allows access
+from JTAG to FLASH in the running bitstream.
+
+This is done by compiling bitstream with
+"SYSCONFIG MASTER_SPI_PORT=ENABLE" in ".lpf" file
+and without "USRMCLK" module in ".v" files. 
 
 Tool may complain if FPGA or FLASH is not detected and
 suggest some fix for a typical cause.
