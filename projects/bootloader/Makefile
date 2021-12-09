@@ -12,6 +12,7 @@ BOARD ?= $(MODEL)-v20
 #BOARD ?= $(MODEL)-v002
 
 # 12k 25k 45k 85k um-85k um5g-85k
+# for ulx4m um-85k apply ecpmulti fix with --input-idcode --output-idcode, see below)
 DEVICE = 12k
 PACKAGE = CABGA381
 SPEEDGRADE = 6
@@ -77,9 +78,12 @@ $(BUILD_TMP)/multiboot.img: $(BUILD_TMP)/$(PROJ).bit build-tmp/passthru.bit
 	  --address $(USER_BITSTREAM_ADDR) --input build-tmp/passthru.bit \
 	  --flashsize 128 \
 	  --output $@
-# to apply non-serdes bootloader bitstream to serdes 85F chip
-# --input-idcode  0x81113043 \
-# --output-idcode 0x81113043 \
+# model=ulx4m DEVICE=um-85k:
+# this must be used for bootloader to jump to user bitstream
+# without this, even normal programming will fail if bootloader is loaded.
+# this can also be used to apply non-serdes bootloader bitstream to serdes 85F chip
+# --input-idcode  0x01113043 \
+# --output-idcode 0x01113043 \
 
 
 $(BUILD_TMP)/multiboot.img.gz: $(BUILD_TMP)/multiboot.img
