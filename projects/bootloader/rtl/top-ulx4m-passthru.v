@@ -62,8 +62,9 @@ module top
 );
 
 	wire [7:0] led8; // only lower 4 LEDs
-	assign led = led8[3:0];
-	wire ftdi_ndtr, ftdi_nrts, sd_wp; // not used
+	//assign led = led8[3:0];
+	assign led = {wifi_gpio15, wifi_gpio14, wifi_gpio13, wifi_gpio12}; // debug SD card
+	wire ftdi_ndtr = 1'b1, ftdi_nrts = 1'b1, sd_wp; // not used
 	// ESP32 passthru FPGA
 	esp32_passthru
 	#(
@@ -87,7 +88,7 @@ module top
 		.wifi_gpio4(wifi_gpio4),
 		.wifi_gpio2(wifi_gpio2),
 		.wifi_gpio0(wifi_gpio0),
-		.wifi_en(wifi_en),
+		//.wifi_en(wifi_en),
 		//  wifi_gpio5 // v3.0.x, not available on v3.1.x
 		`ifdef i2c_bridge_v20   // ULX3S v2.x.x or v3.0.x
 		.wifi_sda(wifi_gpio16), // I2C ESP32 for v3.0.x
@@ -101,7 +102,7 @@ module top
 		.gpdi_sda(gpdi_sda),    // I2C board GPDI and RTC
 		.gpdi_scl(gpdi_scl),    // I2C board GPDI and RTC
 		`endif
-		.user_programn(user_programn),
+		//.user_programn(user_programn),
 		.nc(sd_wp) // BGA pin exists but not connected on PCB
 	);
 
