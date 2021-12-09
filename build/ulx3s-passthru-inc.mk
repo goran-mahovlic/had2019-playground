@@ -1,5 +1,5 @@
 VERILOG = \
-rtl/top-ulx3s-passthru.v \
+rtl/top-$(MODEL)-passthru.v \
 rtl/esp32_passthru.v \
 rtl/i2c_bridge.v \
 
