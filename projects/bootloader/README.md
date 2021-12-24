@@ -63,6 +63,8 @@ USB. Here are some commandline examples:
     dfu-util -a 0 -D blink.bit
     zcat blink.bit.gz | dfu-util -a 0 -D -
     openFPGALoader --dfu --vid 0x1d50 --pid 0x614b --altsetting 0 blink.bit
+    openFPGALoader --board=ulx3s blink.bit
+    openFPGALoader -b ulx3s blink.bit.gz
 
 To exit bootloader and execute user's bistream, use DFU command:
 
