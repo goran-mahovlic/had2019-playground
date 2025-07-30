@@ -41,10 +41,12 @@
 `ifdef BOARD_ULX3S_V317
 `define i2c_bridge_v316
 `endif
-`ifdef BOARD_ULX4M-v004
+`ifdef BOARD_ULX4M-LS-v004
 `define i2c_bridge_v20
 `endif
-
+`ifdef BOARD_ULX4M-LD-v003
+`define i2c_bridge_v20
+`endif
 
 `default_nettype none
 
@@ -63,7 +65,7 @@ module top
 	input  wire [6:0] btn,
 	
 	// DIP switches
-	input  wire sw,
+	input  wire [1:0] sw,
 	
 	// Debug or esp32 passthru UART
 	input  wire ftdi_txd,
@@ -254,7 +256,7 @@ module top
 	// Peripheral [0] : Misc
 	soc_had_misc had_misc_I (
 		.led(led),
-		.btn({sw,btn}),
+		.btn({sw[0],btn}),
 		.btn_remap_o(btn_remap_o),
 		.btn_remap_i(btn_remap_i),
 		.programn(user_programn),
